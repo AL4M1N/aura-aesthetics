@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { copyFileSync, existsSync, mkdirSync } from 'fs'
 
 export default defineConfig({
   plugins: [
@@ -9,6 +10,18 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    {
+      name: 'copy-headers',
+      closeBundle() {
+        // Copy _headers file to dist
+        if (!existsSync('dist')) {
+          mkdirSync('dist', { recursive: true });
+        }
+        if (existsSync('public/_headers')) {
+          copyFileSync('public/_headers', 'dist/_headers');
+        }
+      }
+    }
   ],
   resolve: {
     alias: {
