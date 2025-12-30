@@ -63,13 +63,42 @@ export function Home() {
     }
   ];
 
+  // Gallery Slider
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000 })]);
+
+  const scrollPrev = () => emblaApi?.scrollPrev();
+  const scrollNext = () => emblaApi?.scrollNext();
+
+  const sliderImages = [
+    {
+      url: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=1200',
+      title: 'Natural Lip Enhancement',
+      description: 'Subtle, beautiful results'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1200',
+      title: 'Expert Care',
+      description: 'CPD-certified treatments'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1200',
+      title: 'Facial Contouring',
+      description: 'Define your features'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1200',
+      title: 'Anti-Aging Excellence',
+      description: 'Turn back time naturally'
+    }
+  ];
+
   const services = [
     {
       id: 1,
       title: 'Lip Enhancement',
       description: 'Achieve perfectly sculpted, natural-looking lips with our precision filler techniques',
       price: 'from £120',
-      image: 'https://images.unsplash.com/photo-5194155103236-718bdfcd89c8?w=800',
+      image: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=800',
       popular: true,
     },
     {
@@ -203,6 +232,91 @@ export function Home() {
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--aura-rose-gold)]/5 rounded-full blur-3xl" />
         </div>
 
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-32 w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <motion.div 
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <div className="inline-block">
+                <span className="px-6 py-2 bg-white/80 backdrop-blur-sm text-[var(--aura-rose-gold)] font-['Inter'] text-xs tracking-[0.3em] uppercase border border-[var(--aura-rose-gold)]/20">
+                  CPD Accredited Practitioner
+                </span>
+              </div>
+              
+              <h1 className="font-['Cormorant_Garamond'] text-6xl lg:text-7xl xl:text-8xl font-light text-[var(--aura-deep-brown)] leading-[1.1]">
+                Elevate Your
+                <span className="block text-[var(--aura-rose-gold)] italic">Natural Beauty</span>
+              </h1>
+              
+              <p className="font-['Inter'] text-lg text-[var(--aura-soft-taupe)] leading-relaxed max-w-xl">
+                Experience the art of aesthetic enhancement with a CPD-accredited practitioner. 
+                We specialize in creating subtle, natural-looking results that enhance your unique features.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 pt-4">
+                <Link
+                  to="/booking"
+                  className="group relative px-10 py-5 bg-[var(--aura-deep-brown)] text-white font-['Inter'] text-sm tracking-wider overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    Book Consultation
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
+                  </span>
+                  <div className="absolute inset-0 bg-[var(--aura-rose-gold)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                </Link>
+                <Link
+                  to="/services"
+                  className="group px-10 py-5 border-2 border-[var(--aura-deep-brown)] text-[var(--aura-deep-brown)] font-['Inter'] text-sm tracking-wider hover:bg-[var(--aura-deep-brown)] hover:text-white transition-all duration-300 flex items-center justify-center gap-3"
+                >
+                  View Services
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Right Image */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="relative aspect-[3/4] overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1632054224477-c9cb3aae1b7e?w=800"
+                  alt="Professional Aesthetic Practitioner"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--aura-deep-brown)]/40 via-transparent to-transparent" />
+                
+                {/* Floating Badge */}
+                <div className="absolute bottom-8 left-8 right-8 bg-white/95 backdrop-blur-md p-6">
+                  <div className="flex items-center gap-4">
+                    <Award className="w-12 h-12 text-[var(--aura-rose-gold)]" />
+                    <div>
+                      <p className="font-['Cormorant_Garamond'] text-2xl font-medium text-[var(--aura-deep-brown)]">CPD Certified</p>
+                      <p className="font-['Inter'] text-sm text-[var(--aura-soft-taupe)]">Trained by Rejuvenate</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative Element */}
+              <div className="absolute -z-10 -right-12 -bottom-12 w-72 h-72 bg-[var(--aura-rose-gold)]/20 rounded-full blur-3xl" />
+            </motion.div>
+          </div>
+      {/* Original Hero Content Section - Now Below Slider */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[var(--aura-nude)]/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--aura-rose-gold)]/5 rounded-full blur-3xl" />
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-6 lg:px-12 w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left Content */}
@@ -286,6 +400,77 @@ export function Home() {
         </div>
       </section>
 
+      {/* Image Slider Section */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="font-['Inter'] text-xs tracking-[0.3em] uppercase text-[var(--aura-rose-gold)] mb-4 block">
+              Experience Excellence
+            </span>
+            <h2 className="font-['Cormorant_Garamond'] text-5xl lg:text-6xl font-light text-[var(--aura-deep-brown)]">
+              Our Artistry
+            </h2>
+          </motion.div>
+
+          <div className="relative">
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex">
+                {sliderImages.map((slide, index) => (
+                  <div key={index} className="flex-[0_0_100%] min-w-0 relative">
+                    <div className="relative aspect-[21/9] overflow-hidden">
+                      <img
+                        src={slide.url}
+                        alt={slide.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--aura-deep-brown)]/70 via-transparent to-transparent" />
+                      
+                      {/* Slide Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-12 lg:p-16">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="max-w-2xl"
+                        >
+                          <h3 className="font-['Cormorant_Garamond'] text-4xl lg:text-5xl font-light text-white mb-4">
+                            {slide.title}
+                          </h3>
+                          <p className="font-['Inter'] text-lg text-white/80">
+                            {slide.description}
+                          </p>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={scrollPrev}
+              className="absolute left-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 backdrop-blur-sm hover:bg-[var(--aura-rose-gold)] text-[var(--aura-deep-brown)] hover:text-white transition-all duration-300 flex items-center justify-center group"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={scrollNext}
+              className="absolute right-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 backdrop-blur-sm hover:bg-[var(--aura-rose-gold)] text-[var(--aura-deep-brown)] hover:text-white transition-all duration-300 flex items-center justify-center group"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Trust Badges */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -333,7 +518,7 @@ export function Home() {
               Signature Services
             </h2>
             <p className="font-['Inter'] text-lg text-[var(--aura-soft-taupe)] max-w-2xl mx-auto">
-              Discover our curated selection of premium aesthetic treatments
+              Discover our curated selection of premium aesthetic treatments, each designed to enhance your natural beauty
             </p>
           </motion.div>
 
@@ -399,6 +584,85 @@ export function Home() {
         </div>
       </section>
 
+      {/* About Preview */}
+      <section className="py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="order-2 lg:order-1"
+            >
+              <span className="font-['Inter'] text-xs tracking-[0.3em] uppercase text-[var(--aura-rose-gold)] mb-4 block">
+                About Me
+              </span>
+              <h2 className="font-['Cormorant_Garamond'] text-5xl lg:text-6xl font-light text-[var(--aura-deep-brown)] mb-8">
+                Your Trusted Aesthetic Partner
+              </h2>
+              
+              <div className="space-y-6 font-['Inter'] text-lg text-[var(--aura-soft-taupe)] leading-relaxed">
+                <p>
+                  As a <strong className="text-[var(--aura-deep-brown)]">CPD-accredited aesthetic practitioner</strong> trained by Rejuvenate, 
+                  I bring expertise, precision, and artistry to every treatment.
+                </p>
+                <p>
+                  My philosophy centers on enhancing your natural beauty through subtle, sophisticated techniques. 
+                  With a commitment to safety, ethics, and personalized care, I ensure every client feels confident 
+                  and beautiful in their own skin.
+                </p>
+              </div>
+
+              <div className="mt-12 flex flex-wrap gap-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[var(--aura-nude)] flex items-center justify-center">
+                    <Award className="w-6 h-6 text-[var(--aura-rose-gold)]" />
+                  </div>
+                  <div>
+                    <p className="font-['Inter'] text-sm text-[var(--aura-deep-brown)] font-medium">CPD Certified</p>
+                    <p className="font-['Inter'] text-xs text-[var(--aura-soft-taupe)]">Professional Excellence</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[var(--aura-nude)] flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-[var(--aura-rose-gold)]" />
+                  </div>
+                  <div>
+                    <p className="font-['Inter'] text-sm text-[var(--aura-deep-brown)] font-medium">Safety First</p>
+                    <p className="font-['Inter'] text-xs text-[var(--aura-soft-taupe)]">Medical Standards</p>
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to="/about"
+                className="inline-flex items-center gap-3 mt-12 px-10 py-5 bg-[var(--aura-deep-brown)] text-white font-['Inter'] text-sm tracking-wider hover:bg-[var(--aura-rose-gold)] transition-colors duration-300"
+              >
+                Learn More About Me
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2 relative"
+            >
+              <div className="relative aspect-[3/4]">
+                <img
+                  src="https://images.unsplash.com/photo-1632054224477-c9cb3aae1b7e?w=800"
+                  alt="Aesthetic Practitioner"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--aura-rose-gold)]/10 to-transparent" />
+              </div>
+              <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-[var(--aura-nude)] -z-10" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-32 bg-[var(--aura-deep-brown)] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -416,7 +680,7 @@ export function Home() {
               Begin Your Beauty Journey
             </h2>
             <p className="font-['Inter'] text-lg text-white/80 mb-12 max-w-2xl mx-auto">
-              Book your complimentary consultation today
+              Book your complimentary consultation and discover how we can help you achieve your aesthetic goals with confidence
             </p>
             <Link
               to="/booking"
