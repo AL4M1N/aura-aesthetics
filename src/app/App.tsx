@@ -9,6 +9,7 @@ import { lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { useVisitorTracking } from '../hooks/useVisitorTracking';
+import { Toaster } from './components/ui/sonner';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
@@ -130,6 +131,7 @@ export default function App() {
     <Router>
       <Suspense fallback={<PageLoader />}>
         <AppContent />
+        <Toaster position="top-right" />
       </Suspense>
     </Router>
   );

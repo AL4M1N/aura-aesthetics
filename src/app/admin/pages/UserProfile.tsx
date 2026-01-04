@@ -37,10 +37,13 @@ export function UserProfile() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const applyUserData = (profile: UserType) => {
+    const profileWithExtra = profile as UserType & { phone_number?: string };
+    const phoneValue = profile.phone ?? profileWithExtra.phone_number ?? '';
+
     setUser(profile);
     setName(profile.name);
     setEmail(profile.email);
-    setPhone(profile.phone || '');
+    setPhone(phoneValue);
   };
 
   const loadUserProfile = async () => {
@@ -71,6 +74,7 @@ export function UserProfile() {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setLoading(true);
 
     try {
