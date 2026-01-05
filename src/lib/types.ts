@@ -108,48 +108,114 @@ export interface DashboardStats {
 }
 
 // Login Logs
+export interface LoginLogUserSummary {
+    id: number;
+    name: string;
+    email: string;
+    phone?: string | null;
+    role_id?: number;
+    status?: 'active' | 'inactive';
+    last_login_at?: string | null;
+    last_login_ip?: string | null;
+    avatar?: string | null;
+}
+
 export interface LoginLog {
     id: number;
-    user_name: string;
+    admin_user_id?: number | null;
     email: string;
     ip_address: string;
-    location: string;
-    device: 'desktop' | 'mobile' | 'tablet';
+    user_agent?: string;
+    device: 'desktop' | 'mobile' | 'tablet' | string;
     browser: string;
+    os?: string | null;
+    location?: string | null;
+    latitude?: string | null;
+    longitude?: string | null;
     status: 'success' | 'failed';
-    reason?: string;
-    timestamp: string;
+    failure_reason?: string | null;
+    attempted_at: string;
+    created_at?: string;
+    updated_at?: string;
+    admin_user?: LoginLogUserSummary | null;
+}
+
+export interface LoginLogStats {
+    total: number;
+    successful: number;
+    failed: number;
+    today: number;
+}
+
+export interface LoginLogPagination {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
 }
 
 export interface LoginLogsResponse {
-    data: LoginLog[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
+    logs: LoginLog[];
+    pagination: LoginLogPagination;
+    stats: LoginLogStats;
 }
 
 // Visitor Logs
+export interface VisitorLogPageView {
+    id: number;
+    visitor_log_id: number;
+    page_url: string;
+    page_title?: string | null;
+    viewed_at?: string | null;
+    time_spent_seconds?: number | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface VisitorLog {
     id: number;
     session_id: string;
     ip_address: string;
-    location: string;
-    device: 'desktop' | 'mobile' | 'tablet';
+    user_agent: string;
+    device: 'desktop' | 'mobile' | 'tablet' | string;
     browser: string;
     os: string;
+    location?: string | null;
+    country_code?: string | null;
+    city?: string | null;
     referrer: string;
-    duration: string;
-    pages_visited: string[];
-    timestamp: string;
+    referrer_source?: string | null;
+    landing_page?: string | null;
+    current_page?: string | null;
+    visited_at: string;
+    session_start?: string | null;
+    session_end?: string | null;
+    duration_seconds?: number | null;
+    duration?: string | null;
+    pages_visited?: string[];
+    page_views?: VisitorLogPageView[];
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface VisitorLogStats {
+    total_visitors: number;
+    avg_duration: string;
+    bounce_rate: string;
+    unique_ips: number;
+}
+
+export interface VisitorLogPagination {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
 }
 
 export interface VisitorLogsResponse {
-    data: VisitorLog[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
+    visitors: VisitorLog[];
+    pagination: VisitorLogPagination;
+    stats: VisitorLogStats;
 }
 
 // User Management
@@ -184,15 +250,79 @@ export interface UsersResponse {
 // Role Management
 export interface CreateRoleRequest {
     name: string;
-    slug: string;
     description?: string;
     color: string;
-    permission_ids: number[];
+    permissions: number[];
 }
 
 export interface UpdateRoleRequest {
     name?: string;
     description?: string;
     color?: string;
-    permission_ids?: number[];
+    permissions?: number[];
+}
+
+// Website Settings / CMS
+export interface WebsiteSocialLinks {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+    whatsapp?: string;
+    youtube?: string;
+    threads?: string;
+}
+
+export interface WebsiteBasicInfo {
+    site_title?: string;
+    site_subtitle?: string;
+    header_cta_label?: string;
+    header_cta_link?: string;
+    footer_disclaimer?: string;
+    footer_subtext?: string;
+    logo_url?: string;
+}
+
+export interface WebsiteLocationInfo {
+    map_embed_url?: string;
+    address_notes?: string;
+}
+
+export interface WebsiteSettingsMeta {
+    last_updated_by?: string;
+    last_updated_at?: string;
+    last_published_at?: string;
+}
+
+export interface WebsiteSettings {
+    branding: WebsiteBasicInfo;
+    social: WebsiteSocialLinks;
+    location: WebsiteLocationInfo;
+    meta?: WebsiteSettingsMeta;
+}
+
+// Page Builder Content
+export interface HomeSlider {
+    id: number;
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    cta_label?: string | null;
+    cta_link?: string | null;
+    media_url?: string | null;
+    sort_order?: number | null;
+    order?: number;
+    is_active?: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface HomeSliderPayload {
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    cta_label?: string | null;
+    cta_link?: string | null;
+    media_url?: string | null;
+    order?: number;
+    is_active?: boolean;
 }

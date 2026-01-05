@@ -17,10 +17,53 @@ import {
   Download,
 } from 'lucide-react';
 import { loginLogService } from '../../../services/loginLogService';
-import type { LoginLog } from '../../../lib/types';
+import type { LoginLog, LoginLogStats } from '../../../lib/types';
+
+const defaultStats: LoginLogStats = {
+  total: 0,
+  successful: 0,
+  failed: 0,
+  today: 0,
+};
+
+const isToday = (value?: string) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+};
+
+const formatTimestamp = (value?: string) => {
+  if (!value) return 'Unknown';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+};
+
+const buildStats = (statsData: Partial<LoginLogStats> | undefined, records: LoginLog[]) => {
+  const fallback = {
+    total: records.length,
+    successful: records.filter((log) => log.status === 'success').length,
+    failed: records.filter((log) => log.status === 'failed').length,
+    today: records.filter((log) => isToday(log.attempted_at || log.created_at)).length,
+  };
+
+  return {
+    total: statsData?.total ?? fallback.total,
+    successful: statsData?.successful ?? fallback.successful,
+    failed: statsData?.failed ?? fallback.failed,
+    today: statsData?.today ?? fallback.today,
+  };
+};
 
 export function LoginLogs() {
   const [logs, setLogs] = useState<LoginLog[]>([]);
+  const [stats, setStats] = useState<LoginLogStats>(defaultStats);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'failed'>('all');
   const [filterDevice, setFilterDevice] = useState<'all' | 'desktop' | 'mobile' | 'tablet'>('all');
@@ -30,7 +73,7 @@ export function LoginLogs() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    loadLogs();
+    void loadLogs();
   }, [currentPage, filterStatus, filterDevice]);
 
   const loadLogs = async () => {
@@ -41,63 +84,59 @@ export function LoginLogs() {
         status: filterStatus !== 'all' ? filterStatus : undefined,
         device: filterDevice !== 'all' ? filterDevice : undefined,
       });
-      
-      console.log('Login logs API response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response keys:', Object.keys(response || {}));
-      
-      // Axios returns response.data directly
-      if (response && typeof response === 'object') {
-        // Check for ApiResponse with success/data structure
-        if (response.success !== undefined && response.data) {
-          console.log('Using ApiResponse format - data:', response.data);
-          // Handle paginated data structure
-          if (Array.isArray(response.data.data)) {
-            setLogs(response.data.data);
-            setTotalPages(response.data.last_page || 1);
-          } else if (Array.isArray(response.data)) {
-            setLogs(response.data);
-            setTotalPages(1);
-          } else {
-            setLogs([]);
-            console.warn('No array data found in response');
-          }
-        }
-        // Check for direct paginated Laravel format: { data: [], last_page: 1, ... }
-        else if (Array.isArray(response.data)) {
-          console.log('Using direct paginated format');
-          setLogs(response.data);
-          setTotalPages(response.last_page || 1);
-        }
-        // Check for direct array
-        else if (Array.isArray(response)) {
-          console.log('Using direct array format');
-          setLogs(response);
-          setTotalPages(1);
-        }
-        else {
-          console.error('Unexpected response structure:', response);
-          setError('Invalid response format from server');
-          setLogs([]);
-        }
-      } else {
-        setError('No data received from server');
-        setLogs([]);
+
+      if (typeof response?.success !== 'undefined' && response.success === false) {
+        throw new Error(response.message || 'Failed to load logs');
       }
+
+      const root = response?.data ?? response;
+      const payload = root?.data ?? root;
+      const logsSource = Array.isArray(payload?.logs)
+        ? payload.logs
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(root?.logs)
+            ? root.logs
+            : Array.isArray(root)
+              ? root
+              : [];
+
+      const normalizedLogs: LoginLog[] = Array.isArray(logsSource) ? logsSource : [];
+      setLogs(normalizedLogs);
+
+      const paginationData =
+        payload?.pagination ?? payload?.meta ?? root?.pagination ?? root?.meta;
+      const derivedTotalPages =
+        paginationData?.last_page ??
+        paginationData?.total_pages ??
+        paginationData?.lastPage ??
+        paginationData?.pages ??
+        1;
+      const total = Math.max(1, Number(derivedTotalPages) || 1);
+      setTotalPages(total);
+
+      const statsData = payload?.stats ?? root?.stats;
+      setStats(buildStats(statsData, normalizedLogs));
     } catch (err: any) {
       console.error('Login logs error:', err);
-      setError(err.message || 'Failed to load logs');
+      setError(err?.message || 'Failed to load logs');
       setLogs([]);
+      setStats(defaultStats);
     } finally {
       setLoading(false);
     }
   };
 
   const filteredLogs = logs.filter((log) => {
+    const userName = log.admin_user?.name || '';
+    const email = log.email || log.admin_user?.email || '';
+    const ipAddress = log.ip_address || '';
+    const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      log.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.ip_address.includes(searchQuery);
+      !query ||
+      userName.toLowerCase().includes(query) ||
+      email.toLowerCase().includes(query) ||
+      ipAddress.toLowerCase().includes(query);
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
     const matchesDevice = filterDevice === 'all' || log.device === filterDevice;
     return matchesSearch && matchesStatus && matchesDevice;
@@ -117,14 +156,21 @@ export function LoginLogs() {
   };
 
   const exportLogs = () => {
-    // TODO: Implement export functionality
     console.log('Exporting logs...');
     alert('Export functionality will be implemented with Laravel backend');
   };
 
+  const handlePageChange = (direction: 'prev' | 'next') => {
+    setCurrentPage((prev) => {
+      if (direction === 'prev') {
+        return Math.max(1, prev - 1);
+      }
+      return Math.min(totalPages, prev + 1);
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#2D1B1B]">Login Logs</h1>
@@ -139,15 +185,25 @@ export function LoginLogs() {
         </button>
       </div>
 
-      {/* Stats Cards */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between gap-4">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={loadLogs}
+            className="text-sm font-semibold text-red-700 underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-[#D4AF77]/20 p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#9B8B7E] font-medium">Total Logins</p>
-              <p className="text-2xl font-bold text-[#2D1B1B] mt-1">
-                {logs.length}
-              </p>
+              <p className="text-2xl font-bold text-[#2D1B1B] mt-1">{stats.total}</p>
             </div>
             <div className="p-3 bg-[#D4AF77]/10 rounded-lg">
               <LogIn className="text-[#D4AF77]" size={24} />
@@ -159,9 +215,7 @@ export function LoginLogs() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#9B8B7E] font-medium">Successful</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
-                {logs.filter((l) => l.status === 'success').length}
-              </p>
+              <p className="text-2xl font-bold text-green-600 mt-1">{stats.successful}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
               <CheckCircle className="text-green-600" size={24} />
@@ -173,9 +227,7 @@ export function LoginLogs() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#9B8B7E] font-medium">Failed</p>
-              <p className="text-2xl font-bold text-red-600 mt-1">
-                {logs.filter((l) => l.status === 'failed').length}
-              </p>
+              <p className="text-2xl font-bold text-red-600 mt-1">{stats.failed}</p>
             </div>
             <div className="p-3 bg-red-100 rounded-lg">
               <AlertCircle className="text-red-600" size={24} />
@@ -187,9 +239,7 @@ export function LoginLogs() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#9B8B7E] font-medium">Today</p>
-              <p className="text-2xl font-bold text-[#D4AF77] mt-1">
-                {logs.filter((l) => l.timestamp.startsWith('2026-01-04')).length}
-              </p>
+              <p className="text-2xl font-bold text-[#D4AF77] mt-1">{stats.today}</p>
             </div>
             <div className="p-3 bg-[#D4AF77]/10 rounded-lg">
               <Calendar className="text-[#D4AF77]" size={24} />
@@ -198,27 +248,26 @@ export function LoginLogs() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D4AF77]/20 p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B8B7E]"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B8B7E]" size={20} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, email, or IP address..."
-              className="w-full pl-11 pr-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+              className="w-full pl-11 pr-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none bg-white text-[#2D1B1B] placeholder:text-[#9B8B7E]"
             />
           </div>
 
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] outline-none"
+            onChange={(e) => {
+              setFilterStatus(e.target.value as 'all' | 'success' | 'failed');
+              setCurrentPage(1);
+            }}
+            className="px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] outline-none bg-white text-[#2D1B1B]"
           >
             <option value="all">All Status</option>
             <option value="success">Success Only</option>
@@ -227,8 +276,11 @@ export function LoginLogs() {
 
           <select
             value={filterDevice}
-            onChange={(e) => setFilterDevice(e.target.value as any)}
-            className="px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] outline-none"
+            onChange={(e) => {
+              setFilterDevice(e.target.value as 'all' | 'desktop' | 'mobile' | 'tablet');
+              setCurrentPage(1);
+            }}
+            className="px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] outline-none bg-white text-[#2D1B1B]"
           >
             <option value="all">All Devices</option>
             <option value="desktop">Desktop</option>
@@ -238,7 +290,6 @@ export function LoginLogs() {
         </div>
       </div>
 
-      {/* Logs Table */}
       <div className="bg-white rounded-xl shadow-sm border border-[#D4AF77]/20 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -276,57 +327,93 @@ export function LoginLogs() {
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-[#FFF8F3] transition-colors">
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="font-semibold text-[#2D1B1B]">{log.user_name}</div>
-                        <div className="text-sm text-[#9B8B7E]">{log.email}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-[#2D1B1B]">{log.timestamp}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-[#2D1B1B]">
-                          <MapPin size={14} />
-                          {log.location}
+                filteredLogs.map((log) => {
+                  const failureMessage = log.failure_reason || (log as any).reason;
+                  return (
+                    <tr key={log.id} className="hover:bg-[#FFF8F3] transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="font-semibold text-[#2D1B1B]">
+                            {log.admin_user?.name || log.email}
+                          </div>
+                          <div className="text-sm text-[#9B8B7E]">
+                            {log.email || log.admin_user?.email || 'N/A'}
+                          </div>
                         </div>
-                        <div className="text-xs text-[#9B8B7E]">{log.ip_address}</div>
-                      </div>
-                    </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-[#2D1B1B]">
-                        {getDeviceIcon(log.device)}
-                        <span className="capitalize">{log.device}</span>
-                      </div>
-                      <div className="text-xs text-[#9B8B7E]">{log.browser}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <span
-                        className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                          log.status === 'success'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {log.status}
-                      </span>
-                      {log.reason && (
-                        <div className="text-xs text-red-600">{log.reason}</div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-[#2D1B1B]">
+                          {formatTimestamp(log.attempted_at || log.created_at)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm text-[#2D1B1B]">
+                            <MapPin size={14} />
+                            {log.location || 'Unknown location'}
+                          </div>
+                          <div className="text-xs text-[#9B8B7E]">{log.ip_address || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm text-[#2D1B1B]">
+                            {getDeviceIcon(log.device)}
+                            <span className="capitalize">{log.device || 'unknown'}</span>
+                          </div>
+                          <div className="text-xs text-[#9B8B7E]">{log.browser || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          <span
+                            className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                              log.status === 'success'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {log.status}
+                          </span>
+                          {failureMessage && (
+                            <div className="text-xs text-red-600">{failureMessage}</div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          <p className="text-sm text-[#9B8B7E]">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handlePageChange('prev')}
+              disabled={currentPage === 1 || loading}
+              className="px-4 py-2 rounded-lg border border-[#D4AF77]/40 text-[#2D1B1B] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePageChange('next')}
+              disabled={currentPage === totalPages || loading}
+              className="px-4 py-2 rounded-lg bg-[#2D1B1B] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

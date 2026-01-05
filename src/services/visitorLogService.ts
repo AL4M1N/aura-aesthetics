@@ -4,7 +4,7 @@
  */
 
 import apiClient from '../lib/axios';
-import type { ApiResponse, VisitorLog, VisitorLogsResponse } from '../lib/types';
+import type { ApiResponse, VisitorLogsResponse } from '../lib/types';
 
 export const visitorLogService = {
     /**

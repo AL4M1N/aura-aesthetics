@@ -1,7 +1,47 @@
+import type { ComponentType } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Instagram, Facebook, Clock } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Instagram,
+  Facebook,
+  Clock,
+  Youtube,
+  MessageCircle,
+  Music2,
+  AtSign,
+} from 'lucide-react';
+import { useWebsiteSettings } from '../context/WebsiteSettingsContext';
 
 export function Footer() {
+  const { settings } = useWebsiteSettings();
+  const branding = settings.branding ?? {};
+  const location = settings.location ?? {};
+  const logoSrc = branding.logo_url || '/logo.png';
+  const siteTitle = branding.site_title || 'Aura Aesthetics';
+  const footerSubtext = branding.footer_subtext || 'CPD-accredited aesthetic practitioner specializing in natural-looking enhancements.';
+  const footerDisclaimer = branding.footer_disclaimer || 'Medical Disclaimer: Results vary per individual. All treatments require consultation.';
+  const addressNotes = location.address_notes || 'Ilford, London\nUnited Kingdom';
+  const addressLines = addressNotes.split(/\n/).filter(Boolean);
+
+  const socialPlatforms: Array<{
+    key: keyof typeof settings.social;
+    label: string;
+    icon: ComponentType<{ className?: string }>;
+  }> = [
+    { key: 'instagram', label: 'Instagram', icon: Instagram },
+    { key: 'facebook', label: 'Facebook', icon: Facebook },
+    { key: 'tiktok', label: 'TikTok', icon: Music2 },
+    { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
+    { key: 'youtube', label: 'YouTube', icon: Youtube },
+    { key: 'threads', label: 'Threads', icon: AtSign },
+  ];
+
+  const socialLinks = socialPlatforms
+    .map((platform) => ({ ...platform, href: settings.social?.[platform.key] }))
+    .filter((platform) => platform.href);
+
   return (
     <footer className="bg-[var(--aura-deep-brown)] text-white">
       {/* Main Footer */}
@@ -10,32 +50,35 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <img 
-              src="/logo.png" 
-              alt="Aura Aesthetics" 
+              src={logoSrc || '/logo.png'}
+              alt={siteTitle}
               className="h-16 lg:h-20 w-auto mb-6"
             />
             <p className="font-['Inter'] text-white/70 leading-relaxed mb-8 max-w-md">
-              CPD-accredited aesthetic practitioner specializing in natural-looking enhancements. 
-              Trained by Rejuvenate with a commitment to safety and excellence.
+              {footerSubtext}
             </p>
             
             {/* Social Links */}
-            <div className="flex gap-4">
-              <a 
-                href="#" 
-                className="w-12 h-12 border border-white/20 flex items-center justify-center hover:bg-[var(--aura-rose-gold)] hover:border-[var(--aura-rose-gold)] transition-all duration-300"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a 
-                href="#" 
-                className="w-12 h-12 border border-white/20 flex items-center justify-center hover:bg-[var(--aura-rose-gold)] hover:border-[var(--aura-rose-gold)] transition-all duration-300"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-            </div>
+            {socialLinks.length > 0 ? (
+              <div className="flex flex-wrap gap-4">
+                {socialLinks.map(({ key, label, icon: Icon, href }) => (
+                  <a
+                    key={key}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 border border-white/20 flex items-center justify-center hover:bg-[var(--aura-rose-gold)] hover:border-[var(--aura-rose-gold)] transition-all duration-300"
+                    aria-label={label}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-white/60">
+                Follow us on social media for treatment updates.
+              </p>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -65,7 +108,16 @@ export function Footer() {
             <ul className="space-y-4 font-['Inter'] text-sm text-white/70">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-[var(--aura-rose-gold)] flex-shrink-0 mt-0.5" />
-                <span>Ilford, London<br />United Kingdom</span>
+                <span>
+                  {addressLines.length > 0
+                    ? addressLines.map((line, index) => (
+                        <span key={`${line}-${index}`}>
+                          {line}
+                          {index < addressLines.length - 1 && <br />}
+                        </span>
+                      ))
+                    : 'Ilford, London'}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-[var(--aura-rose-gold)] flex-shrink-0" />
@@ -105,7 +157,7 @@ export function Footer() {
             </div>
           </div>
           <p className="text-xs text-white/30 font-['Inter'] text-center mt-4">
-            Medical Disclaimer: Results vary per individual. All treatments require consultation.
+            {footerDisclaimer}
           </p>
         </div>
       </div>

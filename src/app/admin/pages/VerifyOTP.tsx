@@ -174,7 +174,7 @@ export function VerifyOTP() {
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className="w-12 h-14 text-center text-2xl font-bold border-2 border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white"
+                  className="w-12 h-14 text-center text-2xl font-bold border-2 border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white text-[#2D1B1B]"
                 />
               ))}
             </div>

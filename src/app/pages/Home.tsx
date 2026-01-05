@@ -4,14 +4,98 @@ import { motion } from 'motion/react';
 import { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { pagesService } from '../../services/pagesService';
+import { resolveCmsAssetUrl } from '../../lib/asset';
+
+interface HeroSlide {
+  url: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  cta: string;
+  ctaLink: string;
+}
+
+const FALLBACK_HERO_SLIDES: HeroSlide[] = [
+  {
+    url: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=1600&q=80',
+    title: 'Unlock Your Perfect Pout',
+    subtitle: 'Expert Lip Enhancement',
+    description: 'Achieve naturally plump, beautiful lips with our precision filler techniques',
+    cta: 'Book Consultation',
+    ctaLink: '/booking',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1600&q=80',
+    title: 'Turn Back Time',
+    subtitle: 'Advanced Anti-Aging',
+    description: 'Restore youthful radiance with our medical-grade dermal treatments',
+    cta: 'Explore Services',
+    ctaLink: '/services',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&q=80',
+    title: 'Define Your Beauty',
+    subtitle: 'Facial Contouring',
+    description: 'Sculpt and enhance your natural features with expert precision',
+    cta: 'Learn More',
+    ctaLink: '/services',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1600&q=80',
+    title: 'Radiate Confidence',
+    subtitle: 'Premium Aesthetics',
+    description: 'CPD-certified treatments for subtle, natural-looking enhancement',
+    cta: 'View Treatments',
+    ctaLink: '/services',
+  },
+];
 
 export function Home() {
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(FALLBACK_HERO_SLIDES);
   // Main Hero Slider
   const [heroEmblaRef, heroEmblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 6000 })]);
   const [heroCurrentIndex, setHeroCurrentIndex] = useState(0);
 
   const scrollHeroPrev = useCallback(() => heroEmblaApi?.scrollPrev(), [heroEmblaApi]);
   const scrollHeroNext = useCallback(() => heroEmblaApi?.scrollNext(), [heroEmblaApi]);
+
+  const fetchHeroSlides = useCallback(async () => {
+    try {
+      const response = await pagesService.getPublicHomeSliders();
+      if (response?.success && Array.isArray(response.data)) {
+        const normalized = response.data
+          .filter((slide) => slide.is_active)
+          .sort(
+            (a, b) =>
+              (a.sort_order ?? a.order ?? a.id) - (b.sort_order ?? b.order ?? b.id),
+          )
+          .map((slide, index) => {
+            const fallback = FALLBACK_HERO_SLIDES[index % FALLBACK_HERO_SLIDES.length];
+            return {
+              url: resolveCmsAssetUrl(slide.media_url) ?? fallback.url,
+              title: slide.subtitle || slide.title || fallback.title,
+              subtitle: slide.title || slide.subtitle || fallback.subtitle,
+              description: slide.description || fallback.description,
+              cta: slide.cta_label || fallback.cta,
+              ctaLink: slide.cta_link || fallback.ctaLink,
+            } satisfies HeroSlide;
+          });
+
+        if (normalized.length) {
+          setHeroSlides(normalized);
+        }
+      } else {
+        throw new Error(response?.message || 'Unable to load hero sliders');
+      }
+    } catch (error) {
+      console.error('Public slider fetch failed:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchHeroSlides();
+  }, [fetchHeroSlides]);
 
   useEffect(() => {
     if (!heroEmblaApi) return;
@@ -27,41 +111,6 @@ export function Home() {
       heroEmblaApi.off('select', onSelect);
     };
   }, [heroEmblaApi]);
-
-  const heroSlides = [
-    {
-      url: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=1600&q=80',
-      title: 'Unlock Your Perfect Pout',
-      subtitle: 'Expert Lip Enhancement',
-      description: 'Achieve naturally plump, beautiful lips with our precision filler techniques',
-      cta: 'Book Consultation',
-      ctaLink: '/booking'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1600&q=80',
-      title: 'Turn Back Time',
-      subtitle: 'Advanced Anti-Aging',
-      description: 'Restore youthful radiance with our medical-grade dermal treatments',
-      cta: 'Explore Services',
-      ctaLink: '/services'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&q=80',
-      title: 'Define Your Beauty',
-      subtitle: 'Facial Contouring',
-      description: 'Sculpt and enhance your natural features with expert precision',
-      cta: 'Learn More',
-      ctaLink: '/services'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1600&q=80',
-      title: 'Radiate Confidence',
-      subtitle: 'Premium Aesthetics',
-      description: 'CPD-certified treatments for subtle, natural-looking enhancement',
-      cta: 'View Treatments',
-      ctaLink: '/services'
-    }
-  ];
 
   const services = [
     {

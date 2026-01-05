@@ -4,7 +4,7 @@
  */
 
 import apiClient from '../lib/axios';
-import type { ApiResponse, LoginLog, LoginLogsResponse } from '../lib/types';
+import type { ApiResponse, LoginLogsResponse } from '../lib/types';
 
 export const loginLogService = {
     /**

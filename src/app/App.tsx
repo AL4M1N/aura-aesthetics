@@ -10,6 +10,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { useVisitorTracking } from '../hooks/useVisitorTracking';
 import { Toaster } from './components/ui/sonner';
+import { WebsiteSettingsProvider } from './context/WebsiteSettingsContext';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
@@ -29,6 +30,8 @@ const RolesManagement = lazy(() => import('./admin/pages/RolesManagement').then(
 const LoginLogs = lazy(() => import('./admin/pages/LoginLogs').then(module => ({ default: module.LoginLogs })));
 const VisitorLogs = lazy(() => import('./admin/pages/VisitorLogs').then(module => ({ default: module.VisitorLogs })));
 const UserProfile = lazy(() => import('./admin/pages/UserProfile').then(module => ({ default: module.UserProfile })));
+const WebsiteManagement = lazy(() => import('./admin/pages/WebsiteManagement').then(module => ({ default: module.WebsiteManagement })));
+const HomePages = lazy(() => import('./admin/pages/HomePages').then(module => ({ default: module.HomePages })));
 
 // Loading component
 const PageLoader = () => (
@@ -117,6 +120,8 @@ function AppContent() {
         <Route path="roles" element={<RolesManagement />} />
         <Route path="login-logs" element={<LoginLogs />} />
         <Route path="visitor-logs" element={<VisitorLogs />} />
+        <Route path="website-management" element={<WebsiteManagement />} />
+        <Route path="pages/home" element={<HomePages />} />
         <Route path="profile" element={<UserProfile />} />
       </Route>
 
@@ -130,8 +135,10 @@ export default function App() {
   return (
     <Router>
       <Suspense fallback={<PageLoader />}>
-        <AppContent />
-        <Toaster position="top-right" />
+        <WebsiteSettingsProvider>
+          <AppContent />
+          <Toaster position="top-right" />
+        </WebsiteSettingsProvider>
       </Suspense>
     </Router>
   );

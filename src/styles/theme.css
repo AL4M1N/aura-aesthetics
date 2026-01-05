@@ -2,7 +2,7 @@
 
 :root {
   --font-size: 16px;
-  
+
   /* Modern Luxury Aesthetic Palette */
   --aura-cream: #FFF8F3;
   --aura-nude: #F5E6D3;
@@ -10,7 +10,7 @@
   --aura-deep-brown: #2D1B1B;
   --aura-soft-taupe: #9B8B7E;
   --aura-accent-rose: #C9A58D;
-  
+
   --background: #FFF8F3;
   --foreground: #2D1B1B;
   --card: #ffffff;
@@ -186,5 +186,15 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+    color: var(--foreground);
+    caret-color: var(--foreground);
+    background-color: var(--input-background);
+  }
+
+  textarea,
+  select {
+    color: var(--foreground);
+    caret-color: var(--foreground);
+    background-color: var(--input-background);
   }
 }

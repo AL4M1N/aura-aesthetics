@@ -19,10 +19,18 @@ export const userService = {
     getUsers: async (
         page: number = 1,
         perPage: number = 15,
-        search: string = ''
+        search: string = '',
+        role?: string,
+        status?: string
     ): Promise<ApiResponse<UsersResponse>> => {
         return await apiClient.get('/admin/users', {
-            params: { page, per_page: perPage, search },
+            params: {
+                page,
+                per_page: perPage,
+                search: search || undefined,
+                role: role || undefined,
+                status: status || undefined,
+            },
         });
     },
 

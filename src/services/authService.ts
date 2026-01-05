@@ -117,7 +117,7 @@ export const authService = {
      * Change user password
      */
     changePassword: async (data: {
-        current_password: string;
+        current_password?: string;
         new_password: string;
         new_password_confirmation: string;
     }): Promise<ApiResponse<any>> => {

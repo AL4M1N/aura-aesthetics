@@ -20,7 +20,8 @@ import type { User as UserType } from '../../../lib/types';
 
 export function UserProfile() {
   const [user, setUser] = useState<UserType | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
   const [isFetchingProfile, setIsFetchingProfile] = useState(true);
 
   // Profile form
@@ -29,20 +30,23 @@ export function UserProfile() {
   const [phone, setPhone] = useState('');
 
   // Password form
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const applyUserData = (profile: UserType) => {
     const profileWithExtra = profile as UserType & { phone_number?: string };
     const phoneValue = profile.phone ?? profileWithExtra.phone_number ?? '';
+    const mergedUser: UserType = {
+      ...(user || {} as UserType),
+      ...profile,
+      role: profile.role ?? user?.role,
+    };
 
-    setUser(profile);
-    setName(profile.name);
-    setEmail(profile.email);
+    setUser(mergedUser);
+    setName(mergedUser.name);
+    setEmail(mergedUser.email);
     setPhone(phoneValue);
   };
 
@@ -50,9 +54,13 @@ export function UserProfile() {
     setIsFetchingProfile(true);
     try {
       const response = await authService.getProfile();
-      if (response?.success && response.data?.user) {
-        applyUserData(response.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      console.log('Profile response:', response);
+      
+      // Handle response.data directly (not response.data.user)
+      if (response?.success && response.data) {
+        const userData = response.data.user || response.data;
+        applyUserData(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
       } else {
         throw new Error(response?.message || 'Failed to load profile');
       }
@@ -75,7 +83,7 @@ export function UserProfile() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setLoading(true);
+    setProfileSaving(true);
 
     try {
       const response: any = await authService.updateProfile({
@@ -87,7 +95,9 @@ export function UserProfile() {
       console.log('Update profile response:', response);
       
       if (response && (response.success !== false)) {
-        await loadUserProfile();
+        const updated = (response.data?.user || response.data || { name, email, phone }) as UserType;
+        applyUserData(updated);
+        localStorage.setItem('user', JSON.stringify(updated));
         toast.success('Profile updated successfully!');
       } else {
         toast.error(response.message || 'Failed to update profile');
@@ -96,7 +106,7 @@ export function UserProfile() {
       console.error('Update profile error:', err);
       toast.error(err.message || 'Failed to update profile');
     } finally {
-      setLoading(false);
+      setProfileSaving(false);
     }
   };
 
@@ -113,22 +123,26 @@ export function UserProfile() {
       return;
     }
 
-    setLoading(true);
+    setPasswordSaving(true);
 
     try {
       const response: any = await authService.changePassword({
-        current_password: currentPassword,
-        new_password: newPassword,
-        new_password_confirmation: confirmPassword,
-      });
+          new_password: newPassword,
+          new_password_confirmation: confirmPassword,
+        });
       
       console.log('Change password response:', response);
       
       if (response && (response.success !== false)) {
         toast.success('Password changed successfully!');
-        setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        if (confirm('Password changed. Do you want to logout now?')) {
+          await authService.logout();
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          window.location.href = '/admin/login';
+        }
       } else {
         toast.error(response.message || 'Failed to change password');
       }
@@ -136,7 +150,7 @@ export function UserProfile() {
       console.error('Change password error:', err);
       toast.error(err.message || 'Failed to change password. Please check your current password.');
     } finally {
-      setLoading(false);
+      setPasswordSaving(false);
     }
   };
 
@@ -169,14 +183,14 @@ export function UserProfile() {
         <div className="bg-white rounded-xl shadow-sm border border-[#D4AF77]/20 p-6">
           <div className="text-center">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-[#D4AF77] to-[#C9A58D] rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
-              {user.name.charAt(0)}
+              {user?.name?.charAt(0) ?? ''}
             </div>
-            <h2 className="text-xl font-bold text-[#2D1B1B]">{user.name}</h2>
+            <h2 className="text-xl font-bold text-[#2D1B1B]">{user?.name}</h2>
             <p className="text-[#9B8B7E] text-sm mt-1">{user.email}</p>
             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-[#FFF8F3] rounded-full">
               <Shield size={16} className="text-[#D4AF77]" />
               <span className="text-sm font-medium text-[#2D1B1B]">
-                {user.role.name}
+                {user.role?.name ?? 'Role not available'}
               </span>
             </div>
           </div>
@@ -197,7 +211,7 @@ export function UserProfile() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none text-[#2D1B1B] bg-white"
                 required
               />
             </div>
@@ -211,7 +225,7 @@ export function UserProfile() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none text-[#2D1B1B] bg-white"
                 required
               />
             </div>
@@ -225,17 +239,17 @@ export function UserProfile() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none text-[#2D1B1B] bg-white"
               />
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={profileSaving}
               className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
             >
               <Save size={18} />
-              {loading ? 'Saving...' : 'Save Changes'}
+              {profileSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </form>
         </div>
@@ -250,28 +264,6 @@ export function UserProfile() {
         <form onSubmit={handlePasswordChange} className="max-w-2xl space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#2D1B1B] mb-2">
-              Current Password
-            </label>
-            <div className="relative">
-              <input
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-12 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9B8B7E] hover:text-[#2D1B1B]"
-              >
-                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#2D1B1B] mb-2">
               New Password
             </label>
             <div className="relative">
@@ -279,7 +271,7 @@ export function UserProfile() {
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-12 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 pr-12 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none text-[#2D1B1B] bg-white"
                 required
                 minLength={8}
               />
@@ -305,7 +297,7 @@ export function UserProfile() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-12 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none"
+                className="w-full px-4 py-2 pr-12 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none text-[#2D1B1B] bg-white"
                 required
                 minLength={8}
               />
@@ -321,11 +313,11 @@ export function UserProfile() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={passwordSaving}
             className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
           >
             <Lock size={18} />
-            {loading ? 'Changing...' : 'Change Password'}
+            {passwordSaving ? 'Changing...' : 'Change Password'}
           </button>
         </form>
       </div>

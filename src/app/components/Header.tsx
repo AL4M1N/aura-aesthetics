@@ -1,11 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { useWebsiteSettings } from '../context/WebsiteSettingsContext';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { settings } = useWebsiteSettings();
+  const branding = settings.branding ?? {};
+  const siteTitle = branding.site_title || 'Aura Aesthetics';
+  const ctaLabel = branding.header_cta_label?.trim() || 'Book Now';
+  const ctaLink = branding.header_cta_link?.trim() || '/booking';
+  const isExternalCta = /^https?:\/\//i.test(ctaLink);
+  const logoSrc = branding.logo_url || '/logo.png';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,13 +23,13 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
+  const navItems = useMemo(() => ([
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Services', path: '/services' },
     { name: 'Consent', path: '/consent' },
-    { name: 'Book Now', path: '/booking', cta: true },
-  ];
+    { name: ctaLabel, path: ctaLink, cta: true, external: isExternalCta },
+  ]), [ctaLabel, ctaLink, isExternalCta]);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -41,8 +49,8 @@ export function Header() {
             className="relative group"
           >
             <img 
-              src="/logo.png" 
-              alt="Aura Aesthetics" 
+              src={logoSrc || '/logo.png'} 
+              alt={siteTitle} 
               className="h-12 lg:h-16 w-auto transition-all duration-300"
             />
             <div className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-[var(--aura-rose-gold)] to-transparent group-hover:w-full transition-all duration-500" />
@@ -52,17 +60,33 @@ export function Header() {
           <nav className="hidden lg:flex items-center gap-12">
             {navItems.map((item) => (
               item.cta ? (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="relative px-8 py-3 bg-[var(--aura-rose-gold)] text-white font-['Inter'] text-sm tracking-wide overflow-hidden group"
-                >
-                  <span className="relative z-10">{item.name}</span>
-                  <div className="absolute inset-0 bg-[var(--aura-deep-brown)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                  <span className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">
-                    {item.name}
-                  </span>
-                </Link>
+                item.external ? (
+                  <a
+                    key={`${item.path}-desktop`}
+                    href={item.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative px-8 py-3 bg-[var(--aura-rose-gold)] text-white font-['Inter'] text-sm tracking-wide overflow-hidden group"
+                  >
+                    <span className="relative z-10">{item.name}</span>
+                    <div className="absolute inset-0 bg-[var(--aura-deep-brown)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                    <span className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">
+                      {item.name}
+                    </span>
+                  </a>
+                ) : (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="relative px-8 py-3 bg-[var(--aura-rose-gold)] text-white font-['Inter'] text-sm tracking-wide overflow-hidden group"
+                  >
+                    <span className="relative z-10">{item.name}</span>
+                    <div className="absolute inset-0 bg-[var(--aura-deep-brown)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                    <span className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">
+                      {item.name}
+                    </span>
+                  </Link>
+                )
               ) : (
                 <Link
                   key={item.path}
@@ -97,20 +121,37 @@ export function Header() {
       >
         <nav className="flex flex-col items-center justify-center h-full gap-8 px-6">
           {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`font-['Cormorant_Garamond'] text-3xl transition-all duration-300 ${
-                item.cta 
-                  ? 'px-12 py-4 bg-[var(--aura-rose-gold)] text-white'
-                  : isActive(item.path)
-                  ? 'text-[var(--aura-rose-gold)]'
-                  : 'text-[var(--aura-deep-brown)] hover:text-[var(--aura-rose-gold)]'
-              }`}
-            >
-              {item.name}
-            </Link>
+            item.external ? (
+              <a
+                key={`${item.path}-mobile`}
+                href={item.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`font-['Cormorant_Garamond'] text-3xl transition-all duration-300 ${
+                  item.cta 
+                    ? 'px-12 py-4 bg-[var(--aura-rose-gold)] text-white'
+                    : 'text-[var(--aura-deep-brown)] hover:text-[var(--aura-rose-gold)]'
+                }`}
+              >
+                {item.name}
+              </a>
+            ) : (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`font-['Cormorant_Garamond'] text-3xl transition-all duration-300 ${
+                  item.cta 
+                    ? 'px-12 py-4 bg-[var(--aura-rose-gold)] text-white'
+                    : isActive(item.path)
+                    ? 'text-[var(--aura-rose-gold)]'
+                    : 'text-[var(--aura-deep-brown)] hover:text-[var(--aura-rose-gold)]'
+                }`}
+              >
+                {item.name}
+              </Link>
+            )
           ))}
         </nav>
       </div>

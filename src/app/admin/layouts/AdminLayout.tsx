@@ -12,6 +12,7 @@ import {
   FileText,
   Eye,
   Settings,
+  Layers,
   LogOut,
   Menu,
   X,
@@ -43,11 +44,21 @@ const menuItems: MenuItem[] = [
       { title: 'Website Visitors', path: '/admin/visitor-logs' },
     ],
   },
+  {
+    title: 'Website Management',
+    icon: FileText,
+    path: '/admin/website-management',
+  },
+  {
+    title: 'Pages',
+    icon: Layers,
+    submenu: [{ title: 'Home', path: '/admin/pages/home' }],
+  },
 ];
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Admin Menu']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
