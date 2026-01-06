@@ -197,4 +197,10 @@
     caret-color: var(--foreground);
     background-color: var(--input-background);
   }
+
+  /* Style for select dropdown options */
+  select option {
+    color: #2D1B1B;
+    background-color: #ffffff;
+  }
 }

@@ -1,6 +1,6 @@
 const RAW_API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000';
 const API_BASE_URL = RAW_API_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
-const CMS_RELATIVE_PREFIXES = ['/uploads/', '/storage/'];
+const CMS_RELATIVE_PREFIXES = ['/uploads/', '/storage/', '/upload/'];
 
 const isAbsoluteAsset = (value?: string | null) => {
     if (!value) return false;

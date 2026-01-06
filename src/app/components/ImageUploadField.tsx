@@ -6,6 +6,7 @@
 import { forwardRef, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Upload, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { resolveCmsAssetUrl } from '../../lib/asset';
 
 interface ImageUploadFieldProps {
   label: string;
@@ -27,11 +28,16 @@ const fileToDataUrl = (file: File) =>
 export const ImageUploadField = forwardRef<HTMLDivElement, ImageUploadFieldProps>(
   ({ label, description, value, onChange, accept = 'image/*', error }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [preview, setPreview] = useState<string | undefined>(value);
+    const [preview, setPreview] = useState<string | undefined>();
     const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
-      setPreview(value);
+      // Resolve the asset URL for display (handles relative paths from CMS)
+      if (value) {
+        setPreview(resolveCmsAssetUrl(value) || value);
+      } else {
+        setPreview(undefined);
+      }
     }, [value]);
 
     const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {

@@ -16,6 +16,7 @@ import { WebsiteSettingsProvider } from './context/WebsiteSettingsContext';
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
 const About = lazy(() => import('./pages/About').then(module => ({ default: module.About })));
 const Services = lazy(() => import('./pages/Services').then(module => ({ default: module.Services })));
+const ServiceDetail = lazy(() => import('./pages/ServiceDetail').then(module => ({ default: module.ServiceDetail })));
 const Consent = lazy(() => import('./pages/Consent').then(module => ({ default: module.Consent })));
 const Booking = lazy(() => import('./pages/Booking').then(module => ({ default: module.Booking })));
 
@@ -32,6 +33,7 @@ const VisitorLogs = lazy(() => import('./admin/pages/VisitorLogs').then(module =
 const UserProfile = lazy(() => import('./admin/pages/UserProfile').then(module => ({ default: module.UserProfile })));
 const WebsiteManagement = lazy(() => import('./admin/pages/WebsiteManagement').then(module => ({ default: module.WebsiteManagement })));
 const HomePages = lazy(() => import('./admin/pages/HomePages').then(module => ({ default: module.HomePages })));
+const ServicesManagement = lazy(() => import('./admin/pages/ServicesManagement').then(module => ({ default: module.ServicesManagement })));
 
 // Loading component
 const PageLoader = () => (
@@ -84,6 +86,15 @@ function AppContent() {
           <Footer />
         </div>
       } />
+      <Route path="/services/:slug" element={
+        <div className="min-h-screen flex flex-col font-['Montserrat']">
+          <Header />
+          <main className="flex-1">
+            <ServiceDetail />
+          </main>
+          <Footer />
+        </div>
+      } />
       <Route path="/consent" element={
         <div className="min-h-screen flex flex-col font-['Montserrat']">
           <Header />
@@ -122,6 +133,7 @@ function AppContent() {
         <Route path="visitor-logs" element={<VisitorLogs />} />
         <Route path="website-management" element={<WebsiteManagement />} />
         <Route path="pages/home" element={<HomePages />} />
+        <Route path="services" element={<ServicesManagement />} />
         <Route path="profile" element={<UserProfile />} />
       </Route>
 

@@ -326,3 +326,144 @@ export interface HomeSliderPayload {
     order?: number;
     is_active?: boolean;
 }
+
+export interface HomeAboutContent {
+    id?: number;
+    kicker_text?: string | null;
+    headline_primary?: string | null;
+    headline_highlight?: string | null;
+    description?: string | null;
+    primary_cta_label?: string | null;
+    primary_cta_link?: string | null;
+    secondary_cta_label?: string | null;
+    secondary_cta_link?: string | null;
+    badge_title?: string | null;
+    badge_subtitle?: string | null;
+    badge_icon?: string | null;
+    image_url?: string | null;
+    is_active?: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface HomeAboutPayload {
+    kicker_text?: string | null;
+    headline_primary?: string | null;
+    headline_highlight?: string | null;
+    description?: string | null;
+    primary_cta_label?: string | null;
+    primary_cta_link?: string | null;
+    secondary_cta_label?: string | null;
+    secondary_cta_link?: string | null;
+    badge_title?: string | null;
+    badge_subtitle?: string | null;
+    badge_icon?: string | null;
+    image_url?: string | null;
+    is_active?: boolean;
+}
+
+// Home Features
+export interface HomeFeature {
+    id: number;
+    icon: string;
+    title: string;
+    description?: string | null;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface HomeFeaturePayload {
+    icon: string;
+    title: string;
+    description?: string | null;
+    sort_order?: number;
+    is_active?: boolean;
+}
+
+// Home CTA Section
+export interface HomeCta {
+    id: number;
+    title: string;
+    subtitle?: string | null;
+    button_text: string;
+    button_link: string;
+    background_color?: string | null;
+    text_color?: string | null;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface HomeCtaPayload {
+    title: string;
+    subtitle?: string | null;
+    button_text: string;
+    button_link: string;
+    background_color?: string | null;
+    text_color?: string | null;
+    is_active?: boolean;
+}
+
+// Home Testimonials
+export interface HomeTestimonial {
+    id: number;
+    client_name: string;
+    client_image?: string | null;
+    service_name: string;
+    testimonial: string;
+    rating?: number | null;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface HomeTestimonialPayload {
+    client_name: string;
+    client_image?: string | null;
+    service_name: string;
+    testimonial: string;
+    rating?: number | null;
+    sort_order?: number;
+    is_active?: boolean;
+}
+
+// Services
+export interface Service {
+    id: number;
+    slug: string;
+    title: string;
+    excerpt?: string | null;
+    detail_content?: string | null;
+    featured_image?: string | null;
+    price_range?: string | null;
+    duration?: string | null;
+    benefits?: string[] | null;
+    process_steps?: { step: number; title: string; description: string }[] | null;
+    gallery_images?: string[] | null;
+    before_after_images?: { before: string; after: string; description?: string }[] | null;
+    is_featured: boolean;
+    is_active: boolean;
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ServicePayload {
+    slug?: string;
+    title: string;
+    excerpt?: string | null;
+    detail_content?: string | null;
+    featured_image?: string | null;
+    price_range?: string | null;
+    duration?: string | null;
+    benefits?: string[] | null;
+    process_steps?: { step: number; title: string; description: string }[] | null;
+    gallery_images?: string[] | null;
+    before_after_images?: { before: string; after: string; description?: string }[] | null;
+    is_featured?: boolean;
+    is_active?: boolean;
+    sort_order?: number;
+}

@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronRight,
   User,
+  Briefcase,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -53,6 +54,11 @@ const menuItems: MenuItem[] = [
     title: 'Pages',
     icon: Layers,
     submenu: [{ title: 'Home', path: '/admin/pages/home' }],
+  },
+  {
+    title: 'Services',
+    icon: Briefcase,
+    path: '/admin/services',
   },
 ];
 
