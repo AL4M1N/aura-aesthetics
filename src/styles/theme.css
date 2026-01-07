@@ -204,3 +204,24 @@
     background-color: #ffffff;
   }
 }
+
+/* Force light theme in About admin pages regardless of system dark mode */
+.dark table td,
+.dark table th,
+.dark input,
+.dark textarea,
+.dark select,
+.dark label,
+.dark [data-slot="table-cell"],
+.dark [data-slot="table-head"] {
+  color: #2D1B1B !important;
+  background-color: inherit;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color: #2D1B1B !important;
+  background-color: #ffffff !important;
+  caret-color: #2D1B1B !important;
+}

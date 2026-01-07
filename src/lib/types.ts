@@ -430,9 +430,67 @@ export interface HomeTestimonialPayload {
     is_active?: boolean;
 }
 
-// Services
+// ============================================
+// SERVICE CATEGORIES
+// ============================================
+
+export interface ServiceCategory {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string | null;
+    icon?: string | null;
+    sort_order: number;
+    is_active: boolean;
+    services_count?: number;
+    services?: Service[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ServiceCategoryPayload {
+    name: string;
+    slug?: string;
+    description?: string | null;
+    icon?: string | null;
+    sort_order?: number;
+    is_active?: boolean;
+}
+
+// ============================================
+// SERVICE INSTRUCTIONS
+// ============================================
+
+export interface ServiceInstruction {
+    id: number;
+    type: 'consultation_required' | 'professional_excellence';
+    title: string;
+    content: string;
+    icon?: string | null;
+    is_active: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface ServiceInstructionPayload {
+    title: string;
+    content: string;
+    icon?: string | null;
+    is_active?: boolean;
+}
+
+// ============================================
+// SERVICES (Updated with Categories)
+// ============================================
+
 export interface Service {
     id: number;
+    category_id?: number | null;
+    category?: {
+        id: number;
+        name: string;
+        slug: string;
+    };
     slug: string;
     title: string;
     excerpt?: string | null;
@@ -452,6 +510,7 @@ export interface Service {
 }
 
 export interface ServicePayload {
+    category_id?: number | null;
     slug?: string;
     title: string;
     excerpt?: string | null;
@@ -466,4 +525,118 @@ export interface ServicePayload {
     is_featured?: boolean;
     is_active?: boolean;
     sort_order?: number;
+}
+
+// ============================================
+// ABOUT PAGE TYPES
+// ============================================
+
+// About Hero Section
+export interface AboutHero {
+    id: number;
+    kicker_text: string; // "About Me"
+    headline_primary: string; // "Artistry Meets"
+    headline_highlight: string; // "Medical Excellence"
+    description: string; // Main description paragraph
+    background_image?: string | null; // Optional background
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AboutHeroPayload {
+    kicker_text: string;
+    headline_primary: string;
+    headline_highlight: string;
+    description: string;
+    background_image?: string | null;
+    is_active?: boolean;
+}
+
+// About Bio Section (Main content with image and badge)
+export interface AboutBio {
+    id: number;
+    title: string; // "Your Journey to Confidence"
+    content: string; // Main biography content
+    image_url: string; // Main practitioner image
+    badge_icon: string; // Icon name (e.g., "award")
+    badge_title: string; // "CPD Accredited"
+    badge_subtitle: string; // "Trained by Rejuvenate"
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AboutBioPayload {
+    title: string;
+    content: string;
+    image_url: string;
+    badge_icon: string;
+    badge_title: string;
+    badge_subtitle: string;
+    is_active?: boolean;
+}
+
+// About Qualifications (like Features)
+export interface AboutQualification {
+    id: number;
+    icon: string;
+    title: string;
+    description: string;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AboutQualificationPayload {
+    icon: string;
+    title: string;
+    description: string;
+    sort_order?: number;
+    is_active?: boolean;
+}
+
+// About Values (like Features)
+export interface AboutValue {
+    id: number;
+    icon: string;
+    title: string;
+    description: string;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AboutValuePayload {
+    icon: string;
+    title: string;
+    description: string;
+    sort_order?: number;
+    is_active?: boolean;
+}
+
+// About Certificates (like Testimonials)
+export interface AboutCertificate {
+    id: number;
+    title: string;
+    issuer: string;
+    issue_date?: string | null;
+    image_url?: string | null;
+    description?: string | null;
+    sort_order: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AboutCertificatePayload {
+    title: string;
+    issuer: string;
+    issue_date?: string | null;
+    image_url?: string | null;
+    description?: string | null;
+    sort_order?: number;
+    is_active?: boolean;
 }

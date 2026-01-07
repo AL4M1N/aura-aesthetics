@@ -53,12 +53,19 @@ const menuItems: MenuItem[] = [
   {
     title: 'Pages',
     icon: Layers,
-    submenu: [{ title: 'Home', path: '/admin/pages/home' }],
+    submenu: [
+      { title: 'Home', path: '/admin/pages/home' },
+      { title: 'About', path: '/admin/pages/about' },
+    ],
   },
   {
     title: 'Services',
     icon: Briefcase,
-    path: '/admin/services',
+    submenu: [
+      { title: 'All Services', path: '/admin/services' },
+      { title: 'Categories', path: '/admin/service-categories' },
+      { title: 'Instructions', path: '/admin/service-instructions' },
+    ],
   },
 ];
 
@@ -240,9 +247,9 @@ export function AdminLayout() {
       <main
         className={`pt-16 transition-all duration-300 ${
           sidebarOpen ? 'ml-64' : 'ml-0'
-        }`}
+        } bg-white min-h-screen`}
       >
-        <div className="p-6">
+        <div className="p-6 bg-gray-50">
           <Outlet />
         </div>
       </main>

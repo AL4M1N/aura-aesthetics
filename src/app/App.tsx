@@ -33,7 +33,10 @@ const VisitorLogs = lazy(() => import('./admin/pages/VisitorLogs').then(module =
 const UserProfile = lazy(() => import('./admin/pages/UserProfile').then(module => ({ default: module.UserProfile })));
 const WebsiteManagement = lazy(() => import('./admin/pages/WebsiteManagement').then(module => ({ default: module.WebsiteManagement })));
 const HomePages = lazy(() => import('./admin/pages/HomePages').then(module => ({ default: module.HomePages })));
+const AboutPages = lazy(() => import('./admin/pages/AboutPages').then(module => ({ default: module.AboutPages })));
 const ServicesManagement = lazy(() => import('./admin/pages/ServicesManagement').then(module => ({ default: module.ServicesManagement })));
+const ServiceCategoriesManagement = lazy(() => import('./admin/pages/ServiceCategoriesManagement'));
+const ServiceInstructionsManagement = lazy(() => import('./admin/pages/ServiceInstructionsManagement'));
 
 // Loading component
 const PageLoader = () => (
@@ -133,7 +136,10 @@ function AppContent() {
         <Route path="visitor-logs" element={<VisitorLogs />} />
         <Route path="website-management" element={<WebsiteManagement />} />
         <Route path="pages/home" element={<HomePages />} />
+        <Route path="pages/about" element={<AboutPages />} />
         <Route path="services" element={<ServicesManagement />} />
+        <Route path="service-categories" element={<ServiceCategoriesManagement />} />
+        <Route path="service-instructions" element={<ServiceInstructionsManagement />} />
         <Route path="profile" element={<UserProfile />} />
       </Route>
 

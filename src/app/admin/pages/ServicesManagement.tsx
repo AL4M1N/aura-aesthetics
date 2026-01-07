@@ -19,7 +19,8 @@ import {
   DialogTitle,
 } from '../../components/ui/dialog';
 import { servicesService } from '../../../services/servicesService';
-import type { Service, ServicePayload } from '../../../lib/types';
+import { serviceCategoriesService } from '../../../services/serviceCategoriesService';
+import type { Service, ServicePayload, ServiceCategory } from '../../../lib/types';
 import { resolveCmsAssetUrl } from '../../../lib/asset';
 
 const buildEmptyService = (): ServicePayload => ({
@@ -37,10 +38,12 @@ const buildEmptyService = (): ServicePayload => ({
   is_featured: false,
   is_active: true,
   sort_order: 1,
+  category_id: undefined,
 });
 
 export function ServicesManagement() {
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [formData, setFormData] = useState<ServicePayload>(buildEmptyService());
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,9 +80,22 @@ export function ServicesManagement() {
     }
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await serviceCategoriesService.getServiceCategories();
+      if (response?.success && Array.isArray(response.data)) {
+        setCategories(response.data);
+      }
+    } catch (error: any) {
+      console.error('Categories fetch failed', error);
+      toast.error(error?.message || 'Failed to load categories');
+    }
+  }, []);
+
   useEffect(() => {
     void fetchServices();
-  }, [fetchServices]);
+    void fetchCategories();
+  }, [fetchServices, fetchCategories]);
 
   // Sync formData with selectedService (like slider component does)
   useEffect(() => {
@@ -99,6 +115,7 @@ export function ServicesManagement() {
         is_featured: selectedService.is_featured,
         is_active: selectedService.is_active,
         sort_order: selectedService.sort_order,
+        category_id: selectedService.category_id ?? undefined,
       });
     }
   }, [selectedService]);
@@ -306,6 +323,7 @@ export function ServicesManagement() {
                   <TableRow className="border-b border-[#E6D4C3]">
                     <TableHead className="text-black font-semibold">Image</TableHead>
                     <TableHead className="text-black font-semibold">Title</TableHead>
+                    <TableHead className="text-black font-semibold">Category</TableHead>
                     <TableHead className="text-black font-semibold">Slug</TableHead>
                     <TableHead className="text-black font-semibold">Price</TableHead>
                     <TableHead className="text-center text-black font-semibold">Featured</TableHead>
@@ -330,6 +348,15 @@ export function ServicesManagement() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium text-black">{service.title}</TableCell>
+                      <TableCell className="text-sm text-black">
+                        {service.category ? (
+                          <Badge variant="outline" className="bg-[#FFF8F3]">
+                            {service.category.name}
+                          </Badge>
+                        ) : (
+                          <span className="text-[#9B8B7E]">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-black">{service.slug}</TableCell>
                       <TableCell className="text-sm text-black">{service.price_range || '—'}</TableCell>
                       <TableCell className="text-center">
@@ -418,6 +445,25 @@ export function ServicesManagement() {
                   placeholder="dermal-fillers"
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="service-category">Category *</Label>
+                <select
+                  id="service-category"
+                  title="Service Category"
+                  value={formData.category_id ?? ''}
+                  onChange={(e) => handleFieldChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-2">
