@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { authService } from '../../../services/authService';
-import { Checkbox } from '../../components/ui/checkbox';
 import type { ApiError } from '../../../lib/types';
 
 export function AdminLogin() {
@@ -18,8 +17,9 @@ export function AdminLogin() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setError('');
     setLoading(true);
 
@@ -77,7 +77,7 @@ export function AdminLogin() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Input */}
             <div>
               <label className="block text-sm font-medium text-[#2D1B1B] mb-2">
@@ -92,9 +92,9 @@ export function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white text-[#2D1B1B]"
+                  className="w-full pl-11 pr-4 py-3 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white"
                   placeholder="admin@example.com"
-                  disabled={loading}
+                  required
                 />
               </div>
             </div>
@@ -113,9 +113,9 @@ export function AdminLogin() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-12 py-3 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white text-[#2D1B1B]"
+                  className="w-full pl-11 pr-12 py-3 border border-[#D4AF77]/30 rounded-lg focus:ring-2 focus:ring-[#D4AF77] focus:border-transparent outline-none transition-all bg-white"
                   placeholder="••••••••"
-                  disabled={loading}
+                  required
                 />
                 <button
                   type="button"
@@ -130,7 +130,10 @@ export function AdminLogin() {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
-                <Checkbox />
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-[#D4AF77] text-[#D4AF77] focus:ring-[#D4AF77]"
+                />
                 <span className="text-sm text-[#9B8B7E]">Remember me</span>
               </label>
               <Link
