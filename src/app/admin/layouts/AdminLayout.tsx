@@ -20,6 +20,8 @@ import {
   ChevronRight,
   User,
   Briefcase,
+  Calendar,
+  ClipboardCheck,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -34,6 +36,16 @@ const menuItems: MenuItem[] = [
     title: 'Dashboard',
     icon: LayoutDashboard,
     path: '/admin/dashboard',
+  },
+  {
+    title: 'Bookings',
+    icon: Calendar,
+    path: '/admin/bookings',
+  },
+  {
+    title: 'Consent Forms',
+    icon: ClipboardCheck,
+    path: '/admin/consent-forms',
   },
   {
     title: 'Admin Menu',

@@ -37,6 +37,8 @@ const AboutPages = lazy(() => import('./admin/pages/AboutPages').then(module => 
 const ServicesManagement = lazy(() => import('./admin/pages/ServicesManagement').then(module => ({ default: module.ServicesManagement })));
 const ServiceCategoriesManagement = lazy(() => import('./admin/pages/ServiceCategoriesManagement'));
 const ServiceInstructionsManagement = lazy(() => import('./admin/pages/ServiceInstructionsManagement'));
+const BookingManagement = lazy(() => import('./admin/pages/BookingManagement').then(module => ({ default: module.BookingManagement })));
+const ConsentFormsManagement = lazy(() => import('./admin/pages/ConsentFormsManagement').then(module => ({ default: module.ConsentFormsManagement })));
 
 // Loading component
 const PageLoader = () => (
@@ -130,6 +132,8 @@ function AppContent() {
       }>
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="bookings" element={<BookingManagement />} />
+        <Route path="consent-forms" element={<ConsentFormsManagement />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="roles" element={<RolesManagement />} />
         <Route path="login-logs" element={<LoginLogs />} />

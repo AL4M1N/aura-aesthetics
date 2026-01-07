@@ -4,12 +4,14 @@ import { Info, ArrowRight, Check, Loader, Calendar } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { motion } from 'motion/react';
 import { serviceCategoriesService } from '../../services/serviceCategoriesService';
+import { servicesService } from '../../services/servicesService';
 import { serviceInstructionsService } from '../../services/serviceInstructionsService';
 import { resolveCmsAssetUrl } from '../../lib/asset';
 import type { ServiceCategory, ServiceInstruction, Service } from '../../lib/types';
 
 export function Services() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [instructions, setInstructions] = useState<ServiceInstruction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,8 +20,9 @@ export function Services() {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [categoriesRes, instructionsRes] = await Promise.all([
+        const [categoriesRes, servicesRes, instructionsRes] = await Promise.all([
           serviceCategoriesService.getPublicServiceCategories(),
+          servicesService.getPublicServices(),
           serviceInstructionsService.getPublicServiceInstructions(),
         ]);
 
@@ -28,6 +31,10 @@ export function Services() {
           if (categoriesRes.data.length > 0) {
             setActiveCategory(categoriesRes.data[0].slug);
           }
+        }
+
+        if (servicesRes.success && Array.isArray(servicesRes.data)) {
+          setServices(servicesRes.data);
         }
 
         if (instructionsRes.success && Array.isArray(instructionsRes.data)) {
@@ -110,7 +117,7 @@ export function Services() {
               {categories.map((category) => (
                 <TabsContent key={category.id} value={category.slug} className="mt-0">
                   <ServiceCategoryContent
-                    services={category.services || []}
+                    services={services.filter(s => s.category_id === category.id)}
                   />
                 </TabsContent>
               ))}
