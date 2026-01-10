@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Award, Heart, Shield, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { pagesService } from '../../services/pagesService';
 import { servicesService } from '../../services/servicesService';
 import { resolveCmsAssetUrl } from '../../lib/asset';
-import type { HomeFeature, Service, HomeCta, HomeTestimonial } from '../../lib/types';
+import type { HomeFeature, Service, HomeTestimonial } from '../../lib/types';
+import { usePersistentCache } from '../../hooks/usePersistentCache';
+import { HomeSkeleton } from '../components/skeletons/PageSkeletons';
 
 interface HeroSlide {
   url: string;
@@ -53,202 +55,224 @@ const FALLBACK_HERO_SLIDES: HeroSlide[] = [
   },
 ];
 
+const FALLBACK_ABOUT_CONTENT = {
+  kicker_text: 'CPD Accredited Practitioner',
+  headline_primary: 'Elevate Your',
+  headline_highlight: 'Natural Beauty',
+  description:
+    'Experience the art of aesthetic enhancement with a CPD-accredited practitioner. We specialize in creating subtle, natural-looking results that enhance your unique features.',
+  primary_cta_label: 'Book Consultation',
+  primary_cta_link: '/booking',
+  secondary_cta_label: 'View Services',
+  secondary_cta_link: '/services',
+  badge_title: 'CPD Certified',
+  badge_subtitle: 'Trained by Rejuvenate',
+  image_url: 'https://images.unsplash.com/photo-1632054224477-c9cb3aae1b7e?w=800',
+};
+
+const FALLBACK_FEATURES: HomeFeature[] = [
+  { id: 1, icon: 'award', title: 'CPD Certified', description: 'Accredited Excellence', sort_order: 1, is_active: true, created_at: '', updated_at: '' },
+  { id: 2, icon: 'shield', title: 'Medical Grade', description: 'Safety Standards', sort_order: 2, is_active: true, created_at: '', updated_at: '' },
+  { id: 3, icon: 'heart', title: 'Client Focused', description: 'Personalized Care', sort_order: 3, is_active: true, created_at: '', updated_at: '' },
+  { id: 4, icon: 'sparkles', title: 'Natural Results', description: 'Subtle Enhancement', sort_order: 4, is_active: true, created_at: '', updated_at: '' },
+];
+
+const FALLBACK_CTA_CONTENT = {
+  title: 'Begin Your Beauty Journey',
+  subtitle: 'Book your complimentary consultation today',
+  button_text: 'Book Free Consultation',
+  button_link: '/booking',
+  background_color: '#2D1B1B',
+  text_color: '#FFFFFF',
+};
+
+interface HomeContentPayload {
+  heroSlides: HeroSlide[];
+  aboutContent: typeof FALLBACK_ABOUT_CONTENT;
+  features: HomeFeature[];
+  services: Service[];
+  ctaContent: typeof FALLBACK_CTA_CONTENT;
+  testimonials: HomeTestimonial[];
+}
+
+const FALLBACK_HOME_CONTENT: HomeContentPayload = {
+  heroSlides: FALLBACK_HERO_SLIDES,
+  aboutContent: FALLBACK_ABOUT_CONTENT,
+  features: FALLBACK_FEATURES,
+  services: [],
+  ctaContent: FALLBACK_CTA_CONTENT,
+  testimonials: [],
+};
+
+const buildHeroSlides = (data: any[]): HeroSlide[] =>
+  data
+    .filter((slide) => slide?.is_active)
+    .sort((a, b) => (a.sort_order ?? a.order ?? a.id) - (b.sort_order ?? b.order ?? b.id))
+    .map((slide, index) => {
+      const fallback = FALLBACK_HERO_SLIDES[index % FALLBACK_HERO_SLIDES.length];
+      return {
+        url: resolveCmsAssetUrl(slide.media_url) ?? fallback.url,
+        title: slide.subtitle || slide.title || fallback.title,
+        subtitle: slide.title || slide.subtitle || fallback.subtitle,
+        description: slide.description || fallback.description,
+        cta: slide.cta_label || fallback.cta,
+        ctaLink: slide.cta_link || fallback.ctaLink,
+      } satisfies HeroSlide;
+    });
+
+const buildAboutContent = (about?: any) => ({
+  kicker_text: about?.kicker_text ?? FALLBACK_ABOUT_CONTENT.kicker_text,
+  headline_primary: about?.headline_primary ?? FALLBACK_ABOUT_CONTENT.headline_primary,
+  headline_highlight: about?.headline_highlight ?? FALLBACK_ABOUT_CONTENT.headline_highlight,
+  description: about?.description ?? FALLBACK_ABOUT_CONTENT.description,
+  primary_cta_label: about?.primary_cta_label ?? FALLBACK_ABOUT_CONTENT.primary_cta_label,
+  primary_cta_link: about?.primary_cta_link ?? FALLBACK_ABOUT_CONTENT.primary_cta_link,
+  secondary_cta_label: about?.secondary_cta_label ?? FALLBACK_ABOUT_CONTENT.secondary_cta_label,
+  secondary_cta_link: about?.secondary_cta_link ?? FALLBACK_ABOUT_CONTENT.secondary_cta_link,
+  badge_title: about?.badge_title ?? FALLBACK_ABOUT_CONTENT.badge_title,
+  badge_subtitle: about?.badge_subtitle ?? FALLBACK_ABOUT_CONTENT.badge_subtitle,
+  image_url: resolveCmsAssetUrl(about?.image_url) ?? FALLBACK_ABOUT_CONTENT.image_url,
+});
+
+const buildFeatures = (data: HomeFeature[] | undefined) =>
+  (data ?? [])
+    .filter((feature) => feature.is_active)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+const buildServices = (data: Service[] | undefined) =>
+  (data ?? [])
+    .map((service) => ({
+      ...service,
+      featured_image: service.featured_image ? resolveCmsAssetUrl(service.featured_image) ?? service.featured_image : null,
+    }));
+
+
+const buildCta = (cta?: any) =>
+  cta?.is_active
+    ? {
+        title: cta.title ?? FALLBACK_CTA_CONTENT.title,
+        subtitle: cta.subtitle ?? FALLBACK_CTA_CONTENT.subtitle,
+        button_text: cta.button_text ?? FALLBACK_CTA_CONTENT.button_text,
+        button_link: cta.button_link ?? FALLBACK_CTA_CONTENT.button_link,
+        background_color: cta.background_color ?? FALLBACK_CTA_CONTENT.background_color,
+        text_color: cta.text_color ?? FALLBACK_CTA_CONTENT.text_color,
+      }
+    : FALLBACK_CTA_CONTENT;
+
+const buildTestimonials = (data: HomeTestimonial[] | undefined) =>
+  (data ?? [])
+    .filter((testimonial) => testimonial.is_active)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((testimonial) => ({
+      ...testimonial,
+      client_image: resolveCmsAssetUrl(testimonial.client_image) ?? testimonial.client_image,
+    }));
+
+const fetchHomeContent = async (): Promise<HomeContentPayload> => {
+  const [sliders, about, features, featuredServices, cta, testimonials] = await Promise.allSettled([
+    pagesService.getPublicHomeSliders(),
+    pagesService.getPublicHomeAbout(),
+    pagesService.getPublicHomeFeatures(),
+    servicesService.getFeaturedServices(),
+    pagesService.getPublicHomeCta(),
+    pagesService.getPublicHomeTestimonials(),
+  ]);
+
+  const heroSlides =
+    sliders.status === 'fulfilled' && sliders.value?.success && Array.isArray(sliders.value.data)
+      ? buildHeroSlides(sliders.value.data)
+      : FALLBACK_HOME_CONTENT.heroSlides;
+
+  const aboutContent =
+    about.status === 'fulfilled' && about.value?.success ? buildAboutContent(about.value.data?.about) : FALLBACK_ABOUT_CONTENT;
+
+  const featureList =
+    features.status === 'fulfilled' && features.value?.success && Array.isArray(features.value.data)
+      ? buildFeatures(features.value.data)
+      : FALLBACK_FEATURES;
+
+  // Parse services payload: handle both direct array and wrapped object responses
+  let parsedServicesList: Service[] = [];
+  if (featuredServices.status === 'fulfilled' && featuredServices.value?.success) {
+    const payload = featuredServices.value.data as unknown;
+    if (Array.isArray(payload)) {
+      parsedServicesList = buildServices(payload);
+    } else if (payload && typeof payload === 'object') {
+      const record = payload as Record<string, unknown>;
+      if (Array.isArray(record.services)) {
+        parsedServicesList = buildServices(record.services as Service[]);
+      } else if (Array.isArray(record.data)) {
+        parsedServicesList = buildServices(record.data as Service[]);
+      }
+    }
+  }
+
+  const ctaContent =
+    cta.status === 'fulfilled' && cta.value?.success ? buildCta(cta.value.data?.cta) : FALLBACK_CTA_CONTENT;
+
+  const testimonialList =
+    testimonials.status === 'fulfilled' && testimonials.value?.success && Array.isArray(testimonials.value.data)
+      ? buildTestimonials(testimonials.value.data)
+      : [];
+
+  return {
+    heroSlides: heroSlides.length ? heroSlides : FALLBACK_HOME_CONTENT.heroSlides,
+    aboutContent,
+    features: featureList.length ? featureList : FALLBACK_FEATURES,
+    services: parsedServicesList,
+    ctaContent,
+    testimonials: testimonialList,
+  } satisfies HomeContentPayload;
+};
+
 export function Home() {
-  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(FALLBACK_HERO_SLIDES);
-  const [aboutContent, setAboutContent] = useState({
-    kicker_text: 'CPD Accredited Practitioner',
-    headline_primary: 'Elevate Your',
-    headline_highlight: 'Natural Beauty',
-    description: 'Experience the art of aesthetic enhancement with a CPD-accredited practitioner. We specialize in creating subtle, natural-looking results that enhance your unique features.',
-    primary_cta_label: 'Book Consultation',
-    primary_cta_link: '/booking',
-    secondary_cta_label: 'View Services',
-    secondary_cta_link: '/services',
-    badge_title: 'CPD Certified',
-    badge_subtitle: 'Trained by Rejuvenate',
-    image_url: 'https://images.unsplash.com/photo-1632054224477-c9cb3aae1b7e?w=800',
+  const { data: homeContent, loading, isCached } = usePersistentCache<HomeContentPayload>('home-content', fetchHomeContent, {
+    fallbackData: FALLBACK_HOME_CONTENT,
+    ttl: 5 * 60 * 1000,
+    revalidateInterval: 10 * 60 * 1000, // Revalidate every 10 minutes
   });
 
-  // Main Hero Slider
-  const [heroEmblaRef, heroEmblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 6000 })]);
+  const heroSlides = useMemo(() => homeContent?.heroSlides ?? FALLBACK_HOME_CONTENT.heroSlides, [homeContent]);
+  const aboutContent = useMemo(() => homeContent?.aboutContent ?? FALLBACK_ABOUT_CONTENT, [homeContent]);
+  const features = useMemo(() => homeContent?.features ?? FALLBACK_FEATURES, [homeContent]);
+  const services = useMemo(() => homeContent?.services ?? [], [homeContent]);
+  const ctaContent = useMemo(() => homeContent?.ctaContent ?? FALLBACK_CTA_CONTENT, [homeContent]);
+  const testimonials = useMemo(() => homeContent?.testimonials ?? [], [homeContent]);
+
+  const [heroEmblaRef, heroEmblaApi] = useEmblaCarousel({ loop: heroSlides.length > 1 }, [Autoplay({ delay: 6000 })]);
   const [heroCurrentIndex, setHeroCurrentIndex] = useState(0);
 
   const scrollHeroPrev = useCallback(() => heroEmblaApi?.scrollPrev(), [heroEmblaApi]);
   const scrollHeroNext = useCallback(() => heroEmblaApi?.scrollNext(), [heroEmblaApi]);
 
-  const fetchHeroSlides = useCallback(async () => {
-    try {
-      const response = await pagesService.getPublicHomeSliders();
-      if (response?.success && Array.isArray(response.data)) {
-        const normalized = response.data
-          .filter((slide) => slide.is_active)
-          .sort(
-            (a, b) =>
-              (a.sort_order ?? a.order ?? a.id) - (b.sort_order ?? b.order ?? b.id),
-          )
-          .map((slide, index) => {
-            const fallback = FALLBACK_HERO_SLIDES[index % FALLBACK_HERO_SLIDES.length];
-            return {
-              url: resolveCmsAssetUrl(slide.media_url) ?? fallback.url,
-              title: slide.subtitle || slide.title || fallback.title,
-              subtitle: slide.title || slide.subtitle || fallback.subtitle,
-              description: slide.description || fallback.description,
-              cta: slide.cta_label || fallback.cta,
-              ctaLink: slide.cta_link || fallback.ctaLink,
-            } satisfies HeroSlide;
-          });
-
-        if (normalized.length) {
-          setHeroSlides(normalized);
-        }
-      } else {
-        throw new Error(response?.message || 'Unable to load hero sliders');
-      }
-    } catch (error) {
-      console.error('Public slider fetch failed:', error);
-    }
-  }, []);
-
-  const fetchAboutContent = useCallback(async () => {
-    try {
-      const response = await pagesService.getPublicHomeAbout();
-      if (response?.success && response.data?.about) {
-        const about = response.data.about;
-        setAboutContent({
-          kicker_text: about.kicker_text ?? '',
-          headline_primary: about.headline_primary ?? '',
-          headline_highlight: about.headline_highlight ?? '',
-          description: about.description ?? '',
-          primary_cta_label: about.primary_cta_label ?? '',
-          primary_cta_link: about.primary_cta_link ?? '',
-          secondary_cta_label: about.secondary_cta_label ?? '',
-          secondary_cta_link: about.secondary_cta_link ?? '',
-          badge_title: about.badge_title ?? '',
-          badge_subtitle: about.badge_subtitle ?? '',
-          image_url: resolveCmsAssetUrl(about.image_url) ?? 'https://images.unsplash.com/photo-1632054224477-c9cb3aae1b7e?w=800',
-        });
-      }
-    } catch (error) {
-      console.error('About content fetch failed:', error);
-    }
-  }, []);
-
-  const fetchFeatures = useCallback(async () => {
-    try {
-      const response = await pagesService.getPublicHomeFeatures();
-      if (response?.success && Array.isArray(response.data)) {
-        const sortedFeatures = response.data
-          .filter((f) => f.is_active)
-          .sort((a, b) => a.sort_order - b.sort_order);
-        setFeatures(sortedFeatures);
-      }
-    } catch (error) {
-      console.error('Features fetch failed:', error);
-    }
-  }, []);
-
-  const fetchFeaturedServices = useCallback(async () => {
-    try {
-      const response = await servicesService.getFeaturedServices();
-      if (response?.success && Array.isArray(response.data)) {
-        setServices(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching featured services:', error);
-    }
-  }, []);
-
-  const fetchCtaContent = useCallback(async () => {
-    try {
-      const response = await pagesService.getPublicHomeCta();
-      if (response?.success && response.data?.cta) {
-        const cta = response.data.cta;
-        if (cta.is_active) {
-          setCtaContent({
-            title: cta.title,
-            subtitle: cta.subtitle ?? '',
-            button_text: cta.button_text,
-            button_link: cta.button_link,
-            background_color: cta.background_color ?? '#2D1B1B',
-            text_color: cta.text_color ?? '#FFFFFF',
-          });
-        }
-      }
-    } catch (error) {
-      console.error('CTA fetch failed:', error);
-    }
-  }, []);
-
-  const fetchTestimonials = useCallback(async () => {
-    try {
-      const response = await pagesService.getPublicHomeTestimonials();
-      if (response?.success && Array.isArray(response.data)) {
-        const activeTestimonials = response.data
-          .filter((testimonial) => testimonial.is_active)
-          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-          .map((testimonial) => ({
-            ...testimonial,
-            client_image: resolveCmsAssetUrl(testimonial.client_image) ?? testimonial.client_image,
-          }));
-        setTestimonials(activeTestimonials);
-      }
-    } catch (error) {
-      console.error('Testimonials fetch failed:', error);
-    }
-  }, []);
-
   useEffect(() => {
-    void fetchHeroSlides();
-    void fetchAboutContent();
-    void fetchFeatures();
-    void fetchFeaturedServices();
-    void fetchCtaContent();
-    void fetchTestimonials();
-  }, [fetchHeroSlides, fetchAboutContent, fetchFeatures, fetchFeaturedServices, fetchCtaContent, fetchTestimonials]);
+    if (!heroEmblaApi) return;
+    heroEmblaApi.reInit?.();
+  }, [heroEmblaApi, heroSlides]);
 
   useEffect(() => {
     if (!heroEmblaApi) return;
-    
+
     const onSelect = () => {
       setHeroCurrentIndex(heroEmblaApi.selectedScrollSnap());
     };
-    
+
     heroEmblaApi.on('select', onSelect);
     onSelect();
-    
+
     return () => {
       heroEmblaApi.off('select', onSelect);
     };
   }, [heroEmblaApi]);
 
-  const [services, setServices] = useState<Service[]>([]);
-
-  const [features, setFeatures] = useState<HomeFeature[]>([
-    { id: 1, icon: 'award', title: 'CPD Certified', description: 'Accredited Excellence', sort_order: 1, is_active: true, created_at: '', updated_at: '' },
-    { id: 2, icon: 'shield', title: 'Medical Grade', description: 'Safety Standards', sort_order: 2, is_active: true, created_at: '', updated_at: '' },
-    { id: 3, icon: 'heart', title: 'Client Focused', description: 'Personalized Care', sort_order: 3, is_active: true, created_at: '', updated_at: '' },
-    { id: 4, icon: 'sparkles', title: 'Natural Results', description: 'Subtle Enhancement', sort_order: 4, is_active: true, created_at: '', updated_at: '' },
-  ]);
-
-  const [ctaContent, setCtaContent] = useState({
-    title: 'Begin Your Beauty Journey',
-    subtitle: 'Book your complimentary consultation today',
-    button_text: 'Book Free Consultation',
-    button_link: '/booking',
-    background_color: '#2D1B1B',
-    text_color: '#FFFFFF',
-  });
-
-  const [testimonials, setTestimonials] = useState<HomeTestimonial[]>([]);
-
   // Testimonials Carousel
   const [testimonialEmblaRef, testimonialEmblaApi] = useEmblaCarousel(
-    { 
+    {
       loop: testimonials.length > 3,
       slidesToScroll: 1,
       align: 'center',
     },
-    [Autoplay({ delay: 5000, stopOnInteraction: true })]
+    [Autoplay({ delay: 5000, stopOnInteraction: true })],
   );
   const [testimonialCurrentIndex, setTestimonialCurrentIndex] = useState(0);
 
@@ -257,16 +281,21 @@ export function Home() {
 
   useEffect(() => {
     if (!testimonialEmblaApi) return;
-    
+
     const onSelect = () => {
       setTestimonialCurrentIndex(testimonialEmblaApi.selectedScrollSnap());
     };
-    
+
     testimonialEmblaApi.on('select', onSelect);
     return () => {
       testimonialEmblaApi.off('select', onSelect);
     };
   }, [testimonialEmblaApi]);
+
+  const showSkeleton = loading && !homeContent;
+  if (showSkeleton) {
+    return <HomeSkeleton />;
+  }
 
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
@@ -455,6 +484,7 @@ export function Home() {
                   alt={aboutContent.headline_primary || 'Professional Aesthetic Practitioner'}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--aura-deep-brown)]/40 via-transparent to-transparent" />
                 
@@ -550,7 +580,7 @@ export function Home() {
                 
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={resolveCmsAssetUrl(service.featured_image) || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800'}
+                    src={service.featured_image || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800'}
                     alt={service.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -671,12 +701,14 @@ export function Home() {
                         className="bg-white p-8 rounded-lg shadow-sm h-full"
                       >
                         <div className="flex items-center gap-4 mb-6">
-                          {testimonial.client_image ? (
+                              {testimonial.client_image ? (
                             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--aura-rose-gold)]/20 flex-shrink-0">
                               <img
-                                src={resolveCmsAssetUrl(testimonial.client_image) || testimonial.client_image}
+                                src={testimonial.client_image}
                                 alt={testimonial.client_name}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
                               />
                             </div>
                           ) : (

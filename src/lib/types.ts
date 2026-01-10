@@ -285,6 +285,10 @@ export interface WebsiteBasicInfo {
 export interface WebsiteLocationInfo {
     map_embed_url?: string;
     address_notes?: string;
+    contact_email?: string;
+    contact_phone?: string;
+    whatsapp_link?: string;
+    contact_hours?: string;
 }
 
 export interface WebsiteSettingsMeta {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Award, Heart, Shield, Target, CheckCircle2, Sparkles, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { pagesService } from '../../services/pagesService';
@@ -10,6 +10,8 @@ import type {
   AboutValue,
   AboutCertificate,
 } from '../../lib/types';
+import { usePersistentCache } from '../../hooks/usePersistentCache';
+import { AboutSkeleton } from '../components/skeletons/PageSkeletons';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   award: Award,
@@ -20,47 +22,85 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   sparkles: Sparkles,
 };
 
+interface AboutContentPayload {
+  hero: AboutHero | null;
+  bio: AboutBio | null;
+  qualifications: AboutQualification[];
+  values: AboutValue[];
+  certificates: AboutCertificate[];
+}
+
+const EMPTY_ABOUT_CONTENT: AboutContentPayload = {
+  hero: null,
+  bio: null,
+  qualifications: [],
+  values: [],
+  certificates: [],
+};
+
+const sortByOrder = <T extends { sort_order: number }>(items: T[]) =>
+  [...items].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+const fetchAboutContent = async (): Promise<AboutContentPayload> => {
+  const [heroRes, bioRes, qualRes, valRes, certRes] = await Promise.allSettled([
+    pagesService.getPublicAboutHero(),
+    pagesService.getPublicAboutBio(),
+    pagesService.getPublicAboutQualifications(),
+    pagesService.getPublicAboutValues(),
+    pagesService.getPublicAboutCertificates(),
+  ]);
+
+  const hero =
+    heroRes.status === 'fulfilled' && heroRes.value?.success && heroRes.value.data?.hero?.is_active !== false
+      ? heroRes.value.data.hero
+      : null;
+
+  const bio =
+    bioRes.status === 'fulfilled' && bioRes.value?.success && bioRes.value.data?.bio?.is_active !== false
+      ? bioRes.value.data.bio
+      : null;
+
+  const qualifications =
+    qualRes.status === 'fulfilled' && qualRes.value?.success && Array.isArray(qualRes.value.data)
+      ? sortByOrder(qualRes.value.data.filter((qual) => qual.is_active))
+      : [];
+
+  const values =
+    valRes.status === 'fulfilled' && valRes.value?.success && Array.isArray(valRes.value.data)
+      ? sortByOrder(valRes.value.data.filter((value) => value.is_active))
+      : [];
+
+  const certificates =
+    certRes.status === 'fulfilled' && certRes.value?.success && Array.isArray(certRes.value.data)
+      ? sortByOrder(certRes.value.data.filter((cert) => cert.is_active))
+      : [];
+
+  return {
+    hero,
+    bio,
+    qualifications,
+    values,
+    certificates,
+  } satisfies AboutContentPayload;
+};
+
 export function About() {
-  const [hero, setHero] = useState<AboutHero | null>(null);
-  const [bio, setBio] = useState<AboutBio | null>(null);
-  const [qualifications, setQualifications] = useState<AboutQualification[]>([]);
-  const [values, setValues] = useState<AboutValue[]>([]);
-  const [certificates, setCertificates] = useState<AboutCertificate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: aboutContent, loading } = usePersistentCache<AboutContentPayload>('about-page-content', fetchAboutContent, {
+    fallbackData: EMPTY_ABOUT_CONTENT,
+    ttl: 10 * 60 * 1000,
+    revalidateInterval: 15 * 60 * 1000,
+  });
+  const hero = aboutContent?.hero ?? null;
+  const bio = aboutContent?.bio ?? null;
+  const qualifications = aboutContent?.qualifications ?? [];
+  const values = aboutContent?.values ?? [];
+  const certificates = aboutContent?.certificates ?? [];
   const [selectedCert, setSelectedCert] = useState<AboutCertificate | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [heroRes, bioRes, qualRes, valRes, certRes] = await Promise.all([
-          pagesService.getPublicAboutHero(),
-          pagesService.getPublicAboutBio(),
-          pagesService.getPublicAboutQualifications(),
-          pagesService.getPublicAboutValues(),
-          pagesService.getPublicAboutCertificates(),
-        ]);
+  const hasContent = Boolean(hero || bio || qualifications.length || values.length || certificates.length);
 
-        if (heroRes.success && heroRes.data.hero) setHero(heroRes.data.hero);
-        if (bioRes.success && bioRes.data.bio) setBio(bioRes.data.bio);
-        if (qualRes.success && Array.isArray(qualRes.data)) setQualifications(qualRes.data);
-        if (valRes.success && Array.isArray(valRes.data)) setValues(valRes.data);
-        if (certRes.success && Array.isArray(certRes.data)) setCertificates(certRes.data);
-      } catch (error) {
-        console.error('Failed to fetch About page content:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--aura-cream)] flex items-center justify-center">
-        <div className="text-[var(--aura-deep-brown)]">Loading...</div>
-      </div>
-    );
+  if (loading && !hasContent) {
+    return <AboutSkeleton />;
   }
 
   return (
@@ -111,6 +151,8 @@ export function About() {
                     src={resolveCmsAssetUrl(bio.image_url)}
                     alt="Aesthetic Practitioner"
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-[var(--aura-nude)] -z-10 hidden lg:block" />
@@ -179,9 +221,7 @@ export function About() {
             </motion.div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {qualifications
-                .sort((a, b) => a.sort_order - b.sort_order)
-                .map((qual, index) => {
+              {qualifications.map((qual, index) => {
                   const Icon = iconMap[qual.icon] || Award;
                   return (
                     <motion.div
@@ -235,9 +275,7 @@ export function About() {
             </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {values
-                .sort((a, b) => a.sort_order - b.sort_order)
-                .map((value, index) => {
+              {values.map((value, index) => {
                   const Icon = iconMap[value.icon] || Heart;
                   return (
                     <motion.div
@@ -287,9 +325,7 @@ export function About() {
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-8 justify-items-center">
-              {certificates
-                .sort((a, b) => a.sort_order - b.sort_order)
-                .map((cert, index) => (
+              {certificates.map((cert, index) => (
                   <motion.button
                     key={cert.id}
                     onClick={() => setSelectedCert(cert)}

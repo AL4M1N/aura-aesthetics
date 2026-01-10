@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Clock, DollarSign, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import { servicesService } from '../../services/servicesService';
@@ -9,8 +9,16 @@ import { resolveCmsAssetUrl } from '../../lib/asset';
 export function ServiceDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const previousCategory = (location.state as { activeCategory?: string } | null)?.activeCategory;
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleBackToServices = () => {
+    if (previousCategory && typeof window !== 'undefined') {
+      sessionStorage.setItem('services-active-tab', previousCategory);
+    }
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -87,6 +95,8 @@ export function ServiceDetail() {
             >
               <Link
                 to="/services"
+                state={previousCategory ? { activeCategory: previousCategory } : undefined}
+                onClick={handleBackToServices}
                 className="inline-flex items-center gap-2 text-[var(--aura-deep-brown)]/70 hover:text-[var(--aura-deep-brown)] mb-6 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />

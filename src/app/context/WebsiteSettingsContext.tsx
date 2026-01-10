@@ -37,6 +37,10 @@ const defaultSettings: WebsiteSettings = {
   location: {
     map_embed_url: '',
     address_notes: 'Ilford, London - United Kingdom',
+    contact_email: 'info@auraaesthetics.co.uk',
+    contact_phone: '+44 7XXX 123456',
+    whatsapp_link: 'https://wa.me/447XXX123456',
+    contact_hours: 'By Appointment Only',
   },
   meta: {},
 };

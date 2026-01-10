@@ -4,7 +4,7 @@
  * SECTIONS: Booking System, Payment Options, Location, Cancellation Policy
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Calendar, Clock, MapPin, CreditCard, AlertTriangle, Phone, Mail, MessageCircle, Loader, User, CheckCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Calendar as CalendarComponent } from '../components/ui/calendar';
@@ -15,14 +15,55 @@ import { servicesService } from '../../services/servicesService';
 import { bookingService } from '../../services/bookingService';
 import { resolveCmsAssetUrl } from '../../lib/asset';
 import type { Service } from '../../lib/types';
+import { useWebsiteSettings } from '../context/WebsiteSettingsContext';
+import { ServicesSkeleton } from '../components/skeletons/PageSkeletons';
+import { usePersistentCache } from '../../hooks/usePersistentCache';
+
+const DEFAULT_CONTACT_EMAIL = 'info@auraaesthetics.co.uk';
+const DEFAULT_CONTACT_PHONE = '+44 7XXX 123456';
+const DEFAULT_WHATSAPP_LINK = 'https://wa.me/447XXX123456';
+const DEFAULT_MAP_EMBED =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d39820.48484891649!2d0.04363!3d51.559!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8a7a4e6b6e12f%3A0x3c4c0f0f0f0f0f0f!2sIlford%2C%20UK!5e0!3m2!1sen!2s!4v1234567890';
+const DEFAULT_ADDRESS_NOTES = 'Ilford, London\nUnited Kingdom';
+const DEFAULT_CONTACT_HOURS = 'By Appointment Only';
+
+const parseServicesPayload = (payload: unknown): Service[] => {
+  if (Array.isArray(payload)) {
+    return payload as Service[];
+  }
+
+  if (payload && typeof payload === 'object') {
+    const record = payload as Record<string, unknown>;
+    if (Array.isArray(record.services)) {
+      return record.services as Service[];
+    }
+    if (Array.isArray(record.data)) {
+      return record.data as Service[];
+    }
+  }
+
+  return [];
+};
+
+const fetchActiveServices = async (): Promise<Service[]> => {
+  try {
+    const response = await servicesService.getPublicServices();
+    if (response.success) {
+      const serviceList = parseServicesPayload(response.data as unknown);
+      return serviceList;
+    }
+    return [];
+  } catch (error) {
+    console.error('Failed to load services:', error);
+    return [];
+  }
+};
 
 export function Booking() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>();
   const [selectedService, setSelectedService] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [paymentOption, setPaymentOption] = useState('deposit');
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -32,53 +73,85 @@ export function Booking() {
     phone: '',
     notes: '',
   });
+  const servicesFallback = useMemo<Service[]>(() => [], []);
+  const { data: servicesData, loading: servicesLoading, isCached } = usePersistentCache<Service[]>(
+    'booking-services',
+    fetchActiveServices,
+    {
+      ttl: 5 * 60 * 1000,
+      fallbackData: servicesFallback,
+      revalidateInterval: 10 * 60 * 1000, // Revalidate every 10 minutes
+    },
+  );
+  const services = servicesData ?? [];
+  const cachedSlotsRef = useRef<Record<string, string[]>>({});
+  
 
   const timeSlots = [
     '09:00', '10:00', '11:00', '12:00',
     '14:00', '15:00', '16:00', '17:00',
   ];
 
-  useEffect(() => {
-    const loadServices = async () => {
-      try {
-        setLoading(true);
-        const response = await servicesService.getPublicServices();
-        if (response.success && Array.isArray(response.data)) {
-          setServices(response.data.filter(s => s.is_active));
-        }
-      } catch (error) {
-        console.error('Failed to load services:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { settings } = useWebsiteSettings();
+  const locationInfo = settings.location ?? {};
+  const contactEmail = locationInfo.contact_email?.trim() || DEFAULT_CONTACT_EMAIL;
+  const contactPhone = locationInfo.contact_phone?.trim() || DEFAULT_CONTACT_PHONE;
+  const whatsappLink = locationInfo.whatsapp_link?.trim() || DEFAULT_WHATSAPP_LINK;
+  const mapEmbedUrl = locationInfo.map_embed_url?.trim() || DEFAULT_MAP_EMBED;
+  const contactHours = locationInfo.contact_hours?.trim() || DEFAULT_CONTACT_HOURS;
+  const addressNotes = locationInfo.address_notes?.trim() || DEFAULT_ADDRESS_NOTES;
+  const addressLines = addressNotes.split(/\n/).filter(Boolean);
+  const sanitizedPhoneHref = contactPhone.replace(/[^+\d]/g, '');
 
-    void loadServices();
-  }, []);
-
-  // Fetch booked slots when date changes
+  // Fetch booked slots when date changes (with debounce)
   useEffect(() => {
-    const loadAvailability = async () => {
-      if (date) {
+    if (!date) {
+      setBookedSlots([]);
+      return;
+    }
+
+    const dateStr = date.toISOString().split('T')[0];
+
+    if (cachedSlotsRef.current[dateStr]) {
+      setBookedSlots(cachedSlotsRef.current[dateStr]);
+      return;
+    }
+
+    setBookedSlots([]);
+    let isActive = true;
+    const timeoutId = setTimeout(() => {
+      const loadAvailability = async () => {
         try {
-          const dateStr = date.toISOString().split('T')[0];
           const response = await bookingService.getAvailableSlots(dateStr);
-          
+
           if (response.success && response.data) {
             const unavailableSlots = response.data.slots
               .filter(slot => !slot.available)
               .map(slot => slot.time);
-            setBookedSlots(unavailableSlots);
+            cachedSlotsRef.current[dateStr] = unavailableSlots;
+            if (isActive) {
+              setBookedSlots(unavailableSlots);
+            }
+          } else if (isActive) {
+            cachedSlotsRef.current[dateStr] = [];
+            setBookedSlots([]);
           }
         } catch (error) {
           console.error('Failed to load availability:', error);
-          // Fallback to empty array if API fails
-          setBookedSlots([]);
+          cachedSlotsRef.current[dateStr] = [];
+          if (isActive) {
+            setBookedSlots([]);
+          }
         }
-      }
-    };
+      };
 
-    void loadAvailability();
+      void loadAvailability();
+    }, 300); // 300ms debounce
+
+    return () => {
+      isActive = false;
+      clearTimeout(timeoutId);
+    };
   }, [date]);
 
   const handleFormChange = (field: string, value: string) => {
@@ -123,15 +196,8 @@ export function Booking() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--aura-cream)] flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-[var(--aura-rose-gold)] animate-spin mx-auto mb-4" />
-          <p className="text-[var(--aura-soft-taupe)]">Loading services...</p>
-        </div>
-      </div>
-    );
+  if (servicesLoading && services.length === 0) {
+    return <ServicesSkeleton />;
   }
 
   const selectedServiceData = services.find(s => s.id.toString() === selectedService);
@@ -292,6 +358,8 @@ export function Booking() {
                           src={resolveCmsAssetUrl(selectedServiceData.featured_image)}
                           alt={selectedServiceData.title}
                           className="w-20 h-20 object-cover rounded"
+                          loading="lazy"
+                          decoding="async"
                         />
                       )}
                       <div className="flex-1">
@@ -570,15 +638,21 @@ export function Booking() {
               viewport={{ once: true }}
               className="bg-gray-200 rounded-lg overflow-hidden h-[400px]"
             >
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d39820.48484891649!2d0.04363!3d51.559!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8a7a4e6b6e12f%3A0x3c4c0f0f0f0f0f0f!2sIlford%2C%20UK!5e0!3m2!1sen!2s!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                title="Clinic Location"
-              />
+              {mapEmbedUrl ? (
+                <iframe
+                  src={mapEmbedUrl}
+                  width="100%"
+                  height="100%"
+                  className="border-0"
+                  allowFullScreen
+                  title="Clinic Location"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-[var(--aura-cream)] text-[var(--aura-soft-taupe)]">
+                  Map preview unavailable
+                </div>
+              )}
             </motion.div>
 
             {/* Contact Details */}
@@ -601,58 +675,82 @@ export function Booking() {
                         Clinic Address
                       </p>
                       <p className="font-['Inter'] text-[var(--aura-soft-taupe)]">
-                        Ilford, London<br />
-                        United Kingdom
+                        {addressLines.map((line, index) => (
+                          <span key={`${line}-${index}`}>
+                            {line}
+                            {index < addressLines.length - 1 && <br />}
+                          </span>
+                        ))}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <Mail className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
-                    <div>
-                      <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
-                        Email
-                      </p>
-                      <a 
-                        href="mailto:info@auraaesthetics.co.uk"
-                        className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
-                      >
-                        info@auraaesthetics.co.uk
-                      </a>
+                  {contactEmail && (
+                    <div className="flex items-start gap-4">
+                      <Mail className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
+                      <div>
+                        <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
+                          Email
+                        </p>
+                        <a
+                          href={`mailto:${contactEmail}`}
+                          className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
+                        >
+                          {contactEmail}
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-start gap-4">
-                    <Phone className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
-                    <div>
-                      <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
-                        Phone
-                      </p>
-                      <a 
-                        href="tel:+447XXX123456"
-                        className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
-                      >
-                        +44 7XXX 123456
-                      </a>
+                  {contactPhone && (
+                    <div className="flex items-start gap-4">
+                      <Phone className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
+                      <div>
+                        <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
+                          Phone
+                        </p>
+                        <a
+                          href={`tel:${sanitizedPhoneHref}`}
+                          className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
+                        >
+                          {contactPhone}
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-start gap-4">
-                    <MessageCircle className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
-                    <div>
-                      <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
-                        WhatsApp
-                      </p>
-                      <a 
-                        href="https://wa.me/447XXX123456"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
-                      >
-                        Message us on WhatsApp
-                      </a>
+                  {whatsappLink && (
+                    <div className="flex items-start gap-4">
+                      <MessageCircle className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
+                      <div>
+                        <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
+                          WhatsApp
+                        </p>
+                        <a
+                          href={whatsappLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-['Inter'] text-[var(--aura-soft-taupe)] hover:text-[var(--aura-rose-gold)] transition-colors"
+                        >
+                          Message us on WhatsApp
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {contactHours && (
+                    <div className="flex items-start gap-4">
+                      <Clock className="text-[var(--aura-rose-gold)] flex-shrink-0 mt-1" size={24} />
+                      <div>
+                        <p className="font-['Inter'] font-medium text-[var(--aura-deep-brown)] mb-1">
+                          Hours
+                        </p>
+                        <p className="font-['Inter'] text-[var(--aura-soft-taupe)]">
+                          {contactHours}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>

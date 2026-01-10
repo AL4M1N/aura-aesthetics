@@ -1,0 +1,394 @@
+[
+  {
+    "key": "home-services",
+    "url": "http://localhost:8000/api/services/featured",
+    "data": {
+      "success": true,
+      "message": "Featured services retrieved successfully",
+      "data": [
+        {
+          "id": 1,
+          "title": "Dermal Fillers",
+          "excerpt": "Restore volume and smooth away wrinkles with our premium dermal filler treatments",
+          "featured_image": "http://localhost:8000/uploads/services/e1862635-7f70-459c-9b00-2f2c0f801310.jpeg",
+          "price_range": "from £150",
+          "slug": "dermal-fillers",
+          "category_id": 1,
+          "sort_order": 1,
+          "category": {
+            "id": 1,
+            "name": "Dermal Fillers",
+            "slug": "dermal-fillers"
+          }
+        },
+        {
+          "id": 2,
+          "title": "Test Title",
+          "excerpt": "Reduce fine lines and prevent wrinkles with botulinum toxin treatments",
+          "featured_image": "http://localhost:8000/uploads/services/500e1020-b254-4eb4-af47-aa9f287e6f3b.jpeg",
+          "price_range": "from £120",
+          "slug": "anti-wrinkle-injections",
+          "category_id": 2,
+          "sort_order": 2,
+          "category": {
+            "id": 2,
+            "name": "Anti-Wrinkle Treatments",
+            "slug": "anti-wrinkle-treatments"
+          }
+        },
+        {
+          "id": 3,
+          "title": "Chemical Peels",
+          "excerpt": "Rejuvenate your skin with our professional chemical peel treatments",
+          "featured_image": "http://localhost:8000/uploads/services/6e8f79ba-12ff-44cb-852a-0696c3955b64.jpeg",
+          "price_range": "from £80",
+          "slug": "chemical-peels",
+          "category_id": 3,
+          "sort_order": 3,
+          "category": {
+            "id": 3,
+            "name": "Skin Treatments",
+            "slug": "skin-treatments"
+          }
+        }
+      ]
+    },
+    "timestamp": 1768065850840
+  },
+  {
+    "key": "all-services",
+    "url": "http://localhost:8000/api/services",
+    "data": {
+      "success": true,
+      "message": "Services retrieved successfully",
+      "data": [
+        {
+          "id": 1,
+          "title": "Dermal Fillers",
+          "excerpt": "Restore volume and smooth away wrinkles with our premium dermal filler treatments",
+          "featured_image": "http://localhost:8000/uploads/services/e1862635-7f70-459c-9b00-2f2c0f801310.jpeg",
+          "price_range": "from £150",
+          "duration": "45-60 minutes",
+          "category_id": 1,
+          "slug": "dermal-fillers",
+          "sort_order": 1,
+          "category": {
+            "id": 1,
+            "name": "Dermal Fillers",
+            "slug": "dermal-fillers"
+          }
+        },
+        {
+          "id": 2,
+          "title": "Test Title",
+          "excerpt": "Reduce fine lines and prevent wrinkles with botulinum toxin treatments",
+          "featured_image": "http://localhost:8000/uploads/services/500e1020-b254-4eb4-af47-aa9f287e6f3b.jpeg",
+          "price_range": "from £120",
+          "duration": "20-30 minutes",
+          "category_id": 2,
+          "slug": "anti-wrinkle-injections",
+          "sort_order": 2,
+          "category": {
+            "id": 2,
+            "name": "Anti-Wrinkle Treatments",
+            "slug": "anti-wrinkle-treatments"
+          }
+        },
+        {
+          "id": 3,
+          "title": "Chemical Peels",
+          "excerpt": "Rejuvenate your skin with our professional chemical peel treatments",
+          "featured_image": "http://localhost:8000/uploads/services/6e8f79ba-12ff-44cb-852a-0696c3955b64.jpeg",
+          "price_range": "from £80",
+          "duration": "30-45 minutes",
+          "category_id": 3,
+          "slug": "chemical-peels",
+          "sort_order": 3,
+          "category": {
+            "id": 3,
+            "name": "Skin Treatments",
+            "slug": "skin-treatments"
+          }
+        },
+        {
+          "id": 4,
+          "title": "Microdermabrasion",
+          "excerpt": "Polish and refine your skin with advanced microdermabrasion",
+          "featured_image": "http://localhost:8000/uploads/services/7284d92d-8b10-40d9-8ba3-03847d17829c.jpeg",
+          "price_range": "from £100",
+          "duration": "60 minutes",
+          "category_id": 3,
+          "slug": "microdermabrasion",
+          "sort_order": 4,
+          "category": {
+            "id": 3,
+            "name": "Skin Treatments",
+            "slug": "skin-treatments"
+          }
+        },
+        {
+          "id": 5,
+          "title": "Laser Hair Removal",
+          "excerpt": "Permanent solution for unwanted body hair",
+          "featured_image": null,
+          "price_range": "from £150",
+          "duration": "30-90 minutes",
+          "category_id": null,
+          "slug": "laser-hair-removal",
+          "sort_order": 5,
+          "category": null
+        }
+      ]
+    },
+    "timestamp": 1768065851011
+  },
+  {
+    "key": "home-sliders",
+    "url": "http://localhost:8000/api/sliders/public",
+    "data": {
+      "success": true,
+      "message": "Home page sliders retrieved successfully",
+      "data": [
+        {
+          "id": 1,
+          "title": "Expert Lip Enhancement",
+          "subtitle": "Unlock Your Perfect Pout",
+          "description": "Achieve naturally plump, beautiful lips with our precision filler techniques",
+          "cta_label": "Book Now",
+          "cta_link": "/booking",
+          "media_url": "http://localhost:8000/uploads/sliders/4961c1f9-6b03-4eec-a39a-082c3063a000.jpeg",
+          "sort_order": 1,
+          "is_active": true,
+          "created_at": "2026-01-05T19:02:03.000000Z",
+          "updated_at": "2026-01-06T09:50:45.000000Z",
+          "order": 1
+        },
+        {
+          "id": 2,
+          "title": "Advanced Anti-Aging",
+          "subtitle": "Turn Back Time",
+          "description": "Restore youthful radiance with our medical-grade dermal treatments",
+          "cta_label": "Explore Services",
+          "cta_link": "/services",
+          "media_url": "/uploads/sliders/9fee4172-c16d-4934-b685-5acfa67e47bb.jpeg",
+          "sort_order": 1,
+          "is_active": true,
+          "created_at": "2026-01-05T19:04:32.000000Z",
+          "updated_at": "2026-01-05T19:04:32.000000Z",
+          "order": 1
+        },
+        {
+          "id": 3,
+          "title": "Facial Contouring",
+          "subtitle": "Define Your Beauty",
+          "description": "Sculpt and enhance your natural features with expert precision",
+          "cta_label": "Learn More",
+          "cta_link": "/services",
+          "media_url": "/uploads/sliders/3d044894-cc3b-46cb-aec1-90520d603ed0.jpeg",
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-01-05T19:05:53.000000Z",
+          "updated_at": "2026-01-05T19:05:53.000000Z",
+          "order": 2
+        },
+        {
+          "id": 4,
+          "title": "Premium Aesthetics",
+          "subtitle": "Radiate Confidence",
+          "description": "CPD-certified treatments for subtle, natural-looking enhancement",
+          "cta_label": "View Treatments",
+          "cta_link": "/services",
+          "media_url": "/uploads/sliders/ac10ce82-d72e-4b61-84bd-bb95a98af428.jpeg",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-01-05T19:06:56.000000Z",
+          "updated_at": "2026-01-05T19:06:56.000000Z",
+          "order": 3
+        }
+      ]
+    },
+    "timestamp": 1768065851181
+  },
+  {
+    "key": "home-about",
+    "url": "http://localhost:8000/api/pages/home/about",
+    "data": {
+      "success": true,
+      "message": "About section retrieved successfully",
+      "data": {
+        "about": {
+          "id": 1,
+          "kicker_text": "CPD Accredited Practitioner",
+          "headline_primary": "Elevate Your",
+          "headline_highlight": "Natural Beauty",
+          "description": "Experience the art of aesthetic enhancement with a CPD-accredited practitioner. We specialize in creating subtle, natural-looking results that enhance your unique features.",
+          "primary_cta_label": "Book Consultation",
+          "primary_cta_link": "/booking",
+          "secondary_cta_label": "View Services",
+          "secondary_cta_link": "/services",
+          "badge_title": "CPD Certified",
+          "badge_subtitle": "Trained by Rejuvenate",
+          "badge_icon": null,
+          "image_url": "/uploads/about/c906268f-e132-49b7-97ba-124134288def.jpeg",
+          "is_active": true,
+          "created_at": "2026-01-06T06:40:32.000000Z",
+          "updated_at": "2026-01-06T06:40:32.000000Z"
+        }
+      }
+    },
+    "timestamp": 1768065851364
+  },
+  {
+    "key": "home-features",
+    "url": "http://localhost:8000/api/pages/home/features",
+    "data": {
+      "success": true,
+      "message": "Features retrieved successfully",
+      "data": [
+        {
+          "id": 2,
+          "icon": "award",
+          "title": "CPD Certified",
+          "description": "Accredited Excellence",
+          "sort_order": 1,
+          "is_active": true,
+          "created_at": "2026-01-06T08:11:25.000000Z",
+          "updated_at": "2026-01-06T08:12:38.000000Z"
+        },
+        {
+          "id": 3,
+          "icon": "shield",
+          "title": "Medical Grade",
+          "description": "Safety Standards",
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-01-06T08:11:48.000000Z",
+          "updated_at": "2026-01-06T08:11:48.000000Z"
+        },
+        {
+          "id": 4,
+          "icon": "heart",
+          "title": "Client Focused",
+          "description": "Personalized Care",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-01-06T08:12:10.000000Z",
+          "updated_at": "2026-01-06T08:12:10.000000Z"
+        },
+        {
+          "id": 6,
+          "icon": "sparkles",
+          "title": "Natural Results",
+          "description": "Subtle Enhancement",
+          "sort_order": 4,
+          "is_active": true,
+          "created_at": "2026-01-06T08:13:00.000000Z",
+          "updated_at": "2026-01-06T08:13:00.000000Z"
+        }
+      ]
+    },
+    "timestamp": 1768065851558
+  },
+  {
+    "key": "home-cta",
+    "url": "http://localhost:8000/api/pages/home/cta",
+    "data": {
+      "success": true,
+      "message": "CTA content retrieved successfully",
+      "data": {
+        "cta": {
+          "id": 1,
+          "title": "Begin Your Beauty Journey",
+          "subtitle": "Book your complimentary consultation today",
+          "button_text": "Book Free Consultation",
+          "button_link": "/booking",
+          "background_color": "#2D1B1B",
+          "text_color": "#FFFFFF",
+          "is_active": true,
+          "created_at": "2026-01-06T10:31:47.000000Z",
+          "updated_at": "2026-01-06T10:43:33.000000Z"
+        }
+      }
+    },
+    "timestamp": 1768065851725
+  },
+  {
+    "key": "home-testimonials",
+    "url": "http://localhost:8000/api/pages/home/testimonials",
+    "data": {
+      "success": true,
+      "message": "Public testimonials retrieved successfully",
+      "data": [
+        {
+          "id": 2,
+          "client_name": "Jane Smith",
+          "client_image": "/uploads/testimonials/b51e85ac-cf1b-4fd6-862a-8b4070bd0c7a.jpeg",
+          "service_name": "Lip Enhancement",
+          "testimonial": "Updated: I'm extremely satisfied with my lip enhancement results. The staff was amazing!",
+          "rating": 5,
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-01-06T11:25:16.000000Z",
+          "updated_at": "2026-01-06T11:47:16.000000Z"
+        },
+        {
+          "id": 3,
+          "client_name": "Emily Davis",
+          "client_image": "/uploads/testimonials/68cb74f7-a452-4e09-a7b4-8f77934f392b.jpeg",
+          "service_name": "Anti-Wrinkle Treatment",
+          "testimonial": "Amazing experience from start to finish. Natural-looking results that have boosted my confidence tremendously.",
+          "rating": 4,
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-01-06T11:25:16.000000Z",
+          "updated_at": "2026-01-06T11:47:33.000000Z"
+        },
+        {
+          "id": 4,
+          "client_name": "Michael Brown",
+          "client_image": "/uploads/testimonials/9b37b753-9d98-405a-93b2-ebc16ad34a49.jpeg",
+          "service_name": "Dermal Fillers",
+          "testimonial": "Professional service and excellent results. The consultation was thorough and I felt informed every step of the way.",
+          "rating": 5,
+          "sort_order": 4,
+          "is_active": true,
+          "created_at": "2026-01-06T11:25:16.000000Z",
+          "updated_at": "2026-01-06T11:47:45.000000Z"
+        },
+        {
+          "id": 14,
+          "client_name": "test",
+          "client_image": "/uploads/testimonials/066247ad-143f-4a96-9cef-2c72a60f8142.jpeg",
+          "service_name": "asdasd",
+          "testimonial": "asdsada asdsa asd sad",
+          "rating": 5,
+          "sort_order": 5,
+          "is_active": true,
+          "created_at": "2026-01-06T11:46:16.000000Z",
+          "updated_at": "2026-01-06T11:46:16.000000Z"
+        }
+      ]
+    },
+    "timestamp": 1768065851895
+  },
+  {
+    "key": "about-page-content",
+    "url": "(composite)",
+    "data": {
+      "qualifications": [],
+      "values": [],
+      "certificates": []
+    },
+    "timestamp": 1768065853221
+  },
+  {
+    "key": "services-page-content",
+    "url": "(composite)",
+    "data": {
+      "categories": [],
+      "services": [],
+      "instructions": []
+    },
+    "timestamp": 1768065853761
+  }
+]

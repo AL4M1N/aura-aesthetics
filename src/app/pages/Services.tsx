@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Info, ArrowRight, Check, Loader, Calendar } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Info, ArrowRight, Check, Calendar } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { motion } from 'motion/react';
 import { serviceCategoriesService } from '../../services/serviceCategoriesService';
@@ -8,57 +8,222 @@ import { servicesService } from '../../services/servicesService';
 import { serviceInstructionsService } from '../../services/serviceInstructionsService';
 import { resolveCmsAssetUrl } from '../../lib/asset';
 import type { ServiceCategory, ServiceInstruction, Service } from '../../lib/types';
+import { usePersistentCache } from '../../hooks/usePersistentCache';
+import { ServicesSkeleton } from '../components/skeletons/PageSkeletons';
+
+interface ServicesContentPayload {
+  categories: ServiceCategory[];
+  services: Service[];
+  instructions: ServiceInstruction[];
+}
+
+const EMPTY_SERVICES_CONTENT: ServicesContentPayload = {
+  categories: [],
+  services: [],
+  instructions: [],
+};
+
+const extractArrayPayload = <T,>(payload: unknown, nestedKeys: string[] = []): T[] => {
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  if (payload && typeof payload === 'object') {
+    // Try nested keys first
+    for (const key of nestedKeys) {
+      const nestedValue = (payload as Record<string, unknown>)[key];
+      if (Array.isArray(nestedValue)) {
+        return nestedValue as T[];
+      }
+    }
+
+    // Try common data fields
+    const record = payload as Record<string, unknown>;
+    if (Array.isArray(record.data)) {
+      return record.data as T[];
+    }
+    if (Array.isArray(record.items)) {
+      return record.items as T[];
+    }
+    if (Array.isArray(record.results)) {
+      return record.results as T[];
+    }
+  }
+
+  return [];
+};
+
+const buildCategories = (data: ServiceCategory[] | undefined) =>
+  (data ?? [])
+    // Public API already returns only active categories, and payload
+    // may not include an explicit is_active flag. Treat undefined as active.
+    .filter((category) => category.is_active !== false)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+const buildServicesList = (data: Service[] | undefined) =>
+  (data ?? [])
+    // Treat missing is_active as active for public endpoints
+    .filter((service) => service.is_active !== false)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((service) => {
+      const baseCategoryId = service.category_id ?? service.category?.id ?? null;
+      let normalizedCategoryId: number | null = baseCategoryId ?? null;
+
+      if (typeof baseCategoryId === 'string') {
+        const parsed = Number.parseInt(baseCategoryId, 10);
+        normalizedCategoryId = Number.isNaN(parsed) ? null : parsed;
+      }
+
+      return {
+        ...service,
+        category_id: normalizedCategoryId,
+        featured_image: service.featured_image ? resolveCmsAssetUrl(service.featured_image) ?? service.featured_image : null,
+      };
+    });
+
+const buildInstructions = (data: ServiceInstruction[] | undefined) =>
+  (data ?? []).filter((instruction) => instruction.is_active !== false);
+
+const fetchServicesContent = async (): Promise<ServicesContentPayload> => {
+  const [categoriesRes, servicesRes, instructionsRes] = await Promise.allSettled([
+    serviceCategoriesService.getPublicServiceCategories(),
+    servicesService.getPublicServices(),
+    serviceInstructionsService.getPublicServiceInstructions(),
+  ]);
+
+  // Extract categories
+  let categoryPayload: ServiceCategory[] = [];
+  if (categoriesRes.status === 'fulfilled') {
+    if (categoriesRes.value?.success) {
+      categoryPayload = extractArrayPayload<ServiceCategory>(categoriesRes.value.data as unknown, ['categories']);
+    }
+  } else {
+    console.error('Failed to fetch categories:', categoriesRes.reason);
+  }
+
+  // Extract services
+  let servicePayload: Service[] = [];
+  if (servicesRes.status === 'fulfilled') {
+    if (servicesRes.value?.success) {
+      servicePayload = extractArrayPayload<Service>(servicesRes.value.data as unknown, ['services']);
+    }
+  } else {
+    console.error('Failed to fetch services:', servicesRes.reason);
+  }
+
+  // Extract instructions
+  let instructionPayload: ServiceInstruction[] = [];
+  if (instructionsRes.status === 'fulfilled') {
+    if (instructionsRes.value?.success) {
+      instructionPayload = extractArrayPayload<ServiceInstruction>(instructionsRes.value.data as unknown, ['instructions']);
+    }
+  } else {
+    console.error('Failed to fetch instructions:', instructionsRes.reason);
+  }
+
+  const categories = buildCategories(categoryPayload);
+  const services = buildServicesList(servicePayload);
+  const instructions = buildInstructions(instructionPayload);
+
+  return {
+    categories,
+    services,
+    instructions,
+  } satisfies ServicesContentPayload;
+};
 
 export function Services() {
-  const [categories, setCategories] = useState<ServiceCategory[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('');
-  const [instructions, setInstructions] = useState<ServiceInstruction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { data: servicesContent, loading } = usePersistentCache<ServicesContentPayload>('services-page-content', fetchServicesContent, {
+    fallbackData: EMPTY_SERVICES_CONTENT,
+    ttl: 5 * 60 * 1000,
+  });
+
+  const categories = useMemo(() => servicesContent?.categories ?? [], [servicesContent]);
+  const services = useMemo(() => servicesContent?.services ?? [], [servicesContent]);
+  const instructions = useMemo(() => servicesContent?.instructions ?? [], [servicesContent]);
+
+  const [activeCategory, setActiveCategory] = useState<string>(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    return sessionStorage.getItem('services-active-tab') ?? '';
+  });
+  const hasAppliedNavState = useRef(false);
+  const hasInitializedFromCategories = useRef(false);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Services Page Data:', {
+      categories: categories.length,
+      services: services.length,
+      instructions: instructions.length,
+      activeCategory,
+      loading,
+    });
+  }, [categories, services, instructions, activeCategory, loading]);
+
+  // Log per-category service counts to help debug mapping issues
+  useEffect(() => {
+    if (!categories.length) return;
+    const counts = categories.map((cat) => ({
+      id: cat.id,
+      slug: cat.slug,
+      name: cat.name,
+      matchedServices: services.filter((s) => {
+        if (s.category_id != null) return s.category_id === cat.id;
+        if (s.category?.id) return s.category.id === cat.id;
+        if (s.category?.slug) return s.category.slug === cat.slug;
+        return false;
+      }).length,
+    }));
+    console.log('Services per category:', counts);
+  }, [categories, services]);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [categoriesRes, servicesRes, instructionsRes] = await Promise.all([
-          serviceCategoriesService.getPublicServiceCategories(),
-          servicesService.getPublicServices(),
-          serviceInstructionsService.getPublicServiceInstructions(),
-        ]);
-
-        if (categoriesRes.success && Array.isArray(categoriesRes.data)) {
-          setCategories(categoriesRes.data);
-          if (categoriesRes.data.length > 0) {
-            setActiveCategory(categoriesRes.data[0].slug);
-          }
-        }
-
-        if (servicesRes.success && Array.isArray(servicesRes.data)) {
-          setServices(servicesRes.data);
-        }
-
-        if (instructionsRes.success && Array.isArray(instructionsRes.data)) {
-          setInstructions(instructionsRes.data);
-        }
-      } catch (error) {
-        console.error('Failed to load services data:', error);
-      } finally {
-        setLoading(false);
+    const navState = (location.state as { activeCategory?: string } | null) ?? null;
+    if (navState?.activeCategory && !hasAppliedNavState.current) {
+      setActiveCategory(navState.activeCategory);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('services-active-tab', navState.activeCategory);
       }
-    };
+      hasAppliedNavState.current = true;
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
-    void loadData();
-  }, []);
+  useEffect(() => {
+    if (!activeCategory) {
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('services-active-tab', activeCategory);
+    }
+  }, [activeCategory]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--aura-cream)] flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-[var(--aura-rose-gold)] animate-spin mx-auto mb-4" />
-          <p className="text-[var(--aura-soft-taupe)]">Loading services...</p>
-        </div>
-      </div>
-    );
+  useEffect(() => {
+    if (!categories.length || hasInitializedFromCategories.current) {
+      return;
+    }
+
+    const storedTab = sessionStorage.getItem('services-active-tab');
+    if (storedTab) {
+      const hasMatch = categories.some((category) => category.slug === storedTab);
+      if (hasMatch) {
+        setActiveCategory(storedTab);
+        hasInitializedFromCategories.current = true;
+        return;
+      }
+    }
+
+    setActiveCategory(categories[0].slug);
+    hasInitializedFromCategories.current = true;
+  }, [categories]);
+
+  const hasCachedData = categories.length > 0 || services.length > 0 || instructions.length > 0;
+  if (loading && !hasCachedData) {
+    return <ServicesSkeleton />;
   }
 
   return (
@@ -91,11 +256,25 @@ export function Services() {
       {/* Services Tabs */}
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6 lg:px-12">
-          {categories.length > 0 && (
-            <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
-              <TabsList className="grid w-full gap-0 h-auto bg-transparent border border-[var(--aura-rose-gold)]/20 p-0 mb-16"
-                style={{ gridTemplateColumns: `repeat(${Math.min(categories.length + 1, 5)}, 1fr)` }}
+          {categories.length === 0 && !loading ? (
+            <div className="text-center py-20">
+              <p className="text-xl text-[var(--aura-soft-taupe)] mb-8">
+                No service categories available at the moment.
+              </p>
+              <Link
+                to="/booking"
+                className="inline-block px-12 py-5 bg-[var(--aura-deep-brown)] text-white font-['Inter'] text-sm tracking-wider hover:bg-[var(--aura-rose-gold)] transition-colors duration-300"
               >
+                Book Consultation
+              </Link>
+            </div>
+          ) : categories.length > 0 ? (
+            <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+              <div className="overflow-x-hidden">
+                <TabsList 
+                  className="grid w-full gap-0 h-auto bg-transparent border border-[var(--aura-rose-gold)]/20 p-0 mb-16"
+                  style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}
+                >
                 {categories.map((category) => (
                   <TabsTrigger
                     key={category.id}
@@ -112,12 +291,28 @@ export function Services() {
                   Consultation
                 </TabsTrigger>
               </TabsList>
+              </div>
 
               {/* Category Services */}
               {categories.map((category) => (
                 <TabsContent key={category.id} value={category.slug} className="mt-0">
                   <ServiceCategoryContent
-                    services={services.filter(s => s.category_id === category.id)}
+                    services={services.filter((service) => {
+                      if (service.category_id != null) {
+                        return service.category_id === category.id;
+                      }
+
+                      if (service.category?.id) {
+                        return service.category.id === category.id;
+                      }
+
+                      if (service.category?.slug) {
+                        return service.category.slug === category.slug;
+                      }
+
+                      return false;
+                    })}
+                    activeCategory={category.slug}
                   />
                 </TabsContent>
               ))}
@@ -142,12 +337,11 @@ export function Services() {
                     to="/booking"
                     className="inline-block px-12 py-5 bg-[var(--aura-deep-brown)] text-white font-['Inter'] text-sm tracking-wider hover:bg-[var(--aura-rose-gold)] transition-colors duration-300"
                   >
-                    Schedule Consultation
                   </Link>
                 </motion.div>
               </TabsContent>
             </Tabs>
-          )}
+          ) : null}
         </div>
       </section>
 
@@ -188,9 +382,10 @@ export function Services() {
 
 interface ServiceCategoryContentProps {
   services: Service[];
+  activeCategory: string;
 }
 
-function ServiceCategoryContent({ services }: ServiceCategoryContentProps) {
+function ServiceCategoryContent({ services, activeCategory }: ServiceCategoryContentProps) {
   if (services.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -217,6 +412,8 @@ function ServiceCategoryContent({ services }: ServiceCategoryContentProps) {
                 src={resolveCmsAssetUrl(service.featured_image)}
                 alt={service.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             </div>
           )}
@@ -282,6 +479,7 @@ function ServiceCategoryContent({ services }: ServiceCategoryContentProps) {
 
               <Link
                 to={`/services/${service.slug}`}
+                state={{ activeCategory }}
                 className="inline-flex items-center gap-2 px-8 py-3 border border-[var(--aura-deep-brown)] text-[var(--aura-deep-brown)] hover:bg-[var(--aura-cream)] transition-colors duration-300 font-['Inter'] font-medium"
               >
                 View Details

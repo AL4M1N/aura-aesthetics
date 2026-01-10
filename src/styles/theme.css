@@ -225,3 +225,15 @@
   background-color: #ffffff !important;
   caret-color: #2D1B1B !important;
 }
+
+/* Mobile menu positioning */
+.mobile-menu-container {
+  top: 6rem;
+  bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .mobile-menu-container {
+    display: none;
+  }
+}

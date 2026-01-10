@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "prefetch": "node scripts/prefetch-api-data.js",
+    "build": "npm run prefetch && vite build",
+    "preview": "vite preview",
     "test": "vite test",
     "dev": "vite"
   },
