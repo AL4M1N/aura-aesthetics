@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog';
+import { AdminDialogContent, AdminBadgeSecondary } from '../../components/ui/admin';
 import { servicesService } from '../../../services/servicesService';
 import { serviceCategoriesService } from '../../../services/serviceCategoriesService';
 import type { Service, ServicePayload, ServiceCategory } from '../../../lib/types';
@@ -350,9 +351,9 @@ export function ServicesManagement() {
                       <TableCell className="font-medium text-black">{service.title}</TableCell>
                       <TableCell className="text-sm text-black">
                         {service.category ? (
-                          <Badge variant="outline" className="bg-[#FFF8F3]">
+                          <AdminBadgeSecondary>
                             {service.category.name}
-                          </Badge>
+                          </AdminBadgeSecondary>
                         ) : (
                           <span className="text-[#9B8B7E]">—</span>
                         )}
@@ -370,6 +371,7 @@ export function ServicesManagement() {
                           size="sm"
                           onClick={() => handleToggleStatus(service)}
                           disabled={togglingId === service.id}
+                          className="hover:bg-[#FFF8F3] transition-all duration-200"
                         >
                           {togglingId === service.id ? (
                             <Loader2 size={16} className="animate-spin" />
@@ -386,14 +388,16 @@ export function ServicesManagement() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditService(service)}
+                            className="hover:bg-[#FFF8F3] transition-all duration-200"
                           >
-                            <Pencil size={16} className="text-black" />
+                            <Pencil size={16} className="text-[#D4AF77]" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(service.id)}
                             disabled={deletingId === service.id}
+                            className="hover:bg-red-50 transition-all duration-200"
                           >
                             {deletingId === service.id ? (
                               <Loader2 size={16} className="animate-spin" />
@@ -414,10 +418,10 @@ export function ServicesManagement() {
 
       {/* Service Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+        <AdminDialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedService ? 'Edit service' : 'Add new service'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#2D1B1B]">{selectedService ? 'Edit service' : 'Add new service'}</DialogTitle>
+            <DialogDescription className="text-[#9B8B7E]">
               {selectedService
                 ? 'Update the service details below.'
                 : 'Fill in the details for the new service.'}
@@ -426,35 +430,37 @@ export function ServicesManagement() {
           <form id="service-form" onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="service-title">Title *</Label>
+                <Label htmlFor="service-title" className="text-[#2D1B1B]">Title *</Label>
                 <Input
                   id="service-title"
                   value={formData.title ?? ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
                   placeholder="Dermal Fillers"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-slug">Slug *</Label>
+                <Label htmlFor="service-slug" className="text-[#2D1B1B]">Slug *</Label>
                 <Input
                   id="service-slug"
                   value={formData.slug ?? ''}
                   onChange={(e) => handleFieldChange('slug', e.target.value)}
                   placeholder="dermal-fillers"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-category">Category *</Label>
+                <Label htmlFor="service-category" className="text-[#2D1B1B]">Category *</Label>
                 <select
                   id="service-category"
                   title="Service Category"
                   value={formData.category_id ?? ''}
                   onChange={(e) => handleFieldChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-[#E6D4C3] bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF77] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 >
                   <option value="">Select a category</option>
@@ -467,44 +473,48 @@ export function ServicesManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-price">Price range</Label>
+                <Label htmlFor="service-price" className="text-[#2D1B1B]">Price range</Label>
                 <Input
                   id="service-price"
                   value={formData.price_range ?? ''}
                   onChange={(e) => handleFieldChange('price_range', e.target.value)}
                   placeholder="from £150"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-duration">Duration</Label>
+                <Label htmlFor="service-duration" className="text-[#2D1B1B]">Duration</Label>
                 <Input
                   id="service-duration"
                   value={formData.duration ?? ''}
                   onChange={(e) => handleFieldChange('duration', e.target.value)}
                   placeholder="45-60 minutes"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 />
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="service-excerpt">Excerpt</Label>
+                <Label htmlFor="service-excerpt" className="text-[#2D1B1B]">Excerpt</Label>
                 <Textarea
                   id="service-excerpt"
                   rows={2}
                   value={formData.excerpt ?? ''}
                   onChange={(e) => handleFieldChange('excerpt', e.target.value)}
                   placeholder="Short description for cards and listings..."
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 />
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="service-detail">Detailed content</Label>
+                <Label htmlFor="service-detail" className="text-[#2D1B1B]">Detailed content</Label>
                 <Textarea
                   id="service-detail"
                   rows={6}
                   value={formData.detail_content ?? ''}
                   onChange={(e) => handleFieldChange('detail_content', e.target.value)}
                   placeholder="Full service description with all details..."
+                  className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 />
               </div>
 
@@ -617,20 +627,25 @@ export function ServicesManagement() {
             />
           </form>
           <DialogFooter className="flex flex-wrap justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => handleDialogChange(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => handleDialogChange(false)}
+              className="border-[#E6D4C3] hover:bg-[#FFF8F3] transition-all duration-200"
+            >
               Cancel
             </Button>
             <Button
               type="submit"
               form="service-form"
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white"
+              className="bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white hover:shadow-lg transition-all duration-200"
             >
               {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
               {selectedService ? 'Update service' : 'Add service'}
             </Button>
           </DialogFooter>
-        </DialogContent>
+  </AdminDialogContent>
       </Dialog>
     </div>
   );

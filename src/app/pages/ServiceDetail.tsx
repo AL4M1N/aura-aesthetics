@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { servicesService } from '../../services/servicesService';
 import type { Service } from '../../lib/types';
 import { resolveCmsAssetUrl } from '../../lib/asset';
+import { SEOHead } from '../components/SEOHead';
 
 export function ServiceDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -72,6 +73,14 @@ export function ServiceDetail() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
+      <SEOHead 
+        pageType="services"
+        pageIdentifier={service.slug}
+        fallbackTitle={`${service.title} - Aura Aesthetics | Professional ${service.title} Treatment`}
+        fallbackDescription={service.excerpt || `Professional ${service.title} treatment at Aura Aesthetics. Expert care with premium results.`}
+        fallbackKeywords={`${service.title.toLowerCase()}, aesthetic treatment, beauty service, ${service.category?.name?.toLowerCase() || 'professional treatment'}`}
+      />
+      
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
         {service.featured_image && (

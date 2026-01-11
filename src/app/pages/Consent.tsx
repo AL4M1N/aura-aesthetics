@@ -8,15 +8,19 @@ import { useState } from 'react';
 import { FileText, AlertTriangle, CheckCircle2, User, Heart, FileSignature, Eye, Printer, Loader, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Input } from '../components/ui/input';
+import DatePicker from '../components/DatePicker';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Textarea } from '../components/ui/textarea';
 import { consentService, type ConsentFormPayload } from '../../services/consentService';
+import { SEOHead } from '../components/SEOHead';
 
 export function Consent() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedFormId, setSubmittedFormId] = useState<number | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -144,7 +148,12 @@ export function Consent() {
         signature: formData.signature,
       };
 
-      await consentService.submitConsentForm(payload);
+      const response = await consentService.submitConsentForm(payload);
+      
+      // Store the form ID for PDF download
+      if (response.data?.id) {
+        setSubmittedFormId(response.data.id);
+      }
       
       setSubmitted(true);
     } catch (error: any) {
@@ -153,6 +162,33 @@ export function Consent() {
       alert(errorMessage);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!submittedFormId) {
+      alert('Form ID not available. Please refresh and try again.');
+      return;
+    }
+
+    try {
+      setDownloadingPdf(true);
+      const blob = await consentService.exportConsentFormPDF(submittedFormId);
+      
+      // Create a blob URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `consent-form-${submittedFormId}-${formData.fullName.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      alert('Failed to download consent form. Please try again.');
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -179,11 +215,21 @@ export function Consent() {
               Back to Home
             </button>
             <button
-              onClick={() => window.print()}
-              className="px-8 py-3 border border-[var(--aura-deep-brown)] text-[var(--aura-deep-brown)] rounded-md font-['Inter'] hover:bg-[var(--aura-cream)] transition-colors flex items-center gap-2"
+              onClick={handleDownloadPDF}
+              disabled={downloadingPdf}
+              className="px-8 py-3 border border-[var(--aura-deep-brown)] text-[var(--aura-deep-brown)] rounded-md font-['Inter'] hover:bg-[var(--aura-cream)] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Printer size={20} />
-              Print Copy
+              {downloadingPdf ? (
+                <>
+                  <Loader size={20} className="animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Printer size={20} />
+                  Download Copy
+                </>
+              )}
             </button>
           </div>
         </motion.div>
@@ -193,8 +239,15 @@ export function Consent() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+      <SEOHead 
+        pageType="consent"
+        fallbackTitle="Consent Form - Aura Aesthetics | Treatment Agreement"
+        fallbackDescription="Complete your treatment consent form online. Secure and professional documentation for your aesthetic treatment journey with Aura Aesthetics."
+        fallbackKeywords="consent form, treatment agreement, aesthetic consent, medical form, beauty treatment consent"
+      />
+      
+  {/* Hero Section */}
+  <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-visible">
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-white/50 to-transparent" />
         </div>
@@ -268,14 +321,14 @@ export function Consent() {
 
                   <div>
                     <Label htmlFor="dateOfBirth" className="font-['Inter'] text-[var(--aura-deep-brown)]">Date of Birth *</Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      value={formData.dateOfBirth}
-                      onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                      className="mt-2 border-[var(--aura-rose-gold)]/20 focus:border-[var(--aura-rose-gold)] font-['Inter']"
-                      required
-                    />
+                    <div className="mt-2">
+                      <DatePicker
+                        id="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={(v) => setFormData({ ...formData, dateOfBirth: v })}
+                        placeholder="YYYY-MM-DD"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">

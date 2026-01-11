@@ -23,9 +23,14 @@ import {
     TableBody,
     TableCell,
     TableHead,
-    TableHeader,
-    TableRow,
 } from '../../components/ui/table';
+import {
+    AdminCard,
+    AdminTableHeader,
+    AdminTableRowHeader,
+    AdminTableRow,
+    AdminDialogContent,
+} from '../../components/ui/admin';
 
 export function BookingManagement() {
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -167,42 +172,42 @@ export function BookingManagement() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold">Booking Management</h1>
-                    <p className="text-gray-500 mt-1">Manage customer appointments and reservations</p>
+                    <h1 className="text-3xl font-bold text-[#2D1B1B]">Booking Management</h1>
+                    <p className="text-[#9B8B7E] mt-1">Manage customer appointments and reservations</p>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-lg shadow border">
-                    <p className="text-sm text-gray-600">Total Bookings</p>
-                    <p className="text-3xl font-bold mt-2">{bookings.length}</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow border">
-                    <p className="text-sm text-gray-600">Pending</p>
-                    <p className="text-3xl font-bold mt-2 text-yellow-600">
+                <AdminCard className="p-6">
+                    <p className="text-sm text-[#9B8B7E]">Total Bookings</p>
+                    <p className="text-3xl font-bold mt-2 text-[#2D1B1B]">{bookings.length}</p>
+                </AdminCard>
+                <AdminCard className="p-6">
+                    <p className="text-sm text-[#9B8B7E]">Pending</p>
+                    <p className="text-3xl font-bold mt-2 text-[#D4AF77]">
                         {bookings.filter(b => b.status === 'pending').length}
                     </p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow border">
-                    <p className="text-sm text-gray-600">Confirmed</p>
+                </AdminCard>
+                <AdminCard className="p-6">
+                    <p className="text-sm text-[#9B8B7E]">Confirmed</p>
                     <p className="text-3xl font-bold mt-2 text-green-600">
                         {bookings.filter(b => b.status === 'confirmed').length}
                     </p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow border">
-                    <p className="text-sm text-gray-600">Completed</p>
-                    <p className="text-3xl font-bold mt-2 text-blue-600">
+                </AdminCard>
+                <AdminCard className="p-6">
+                    <p className="text-sm text-[#9B8B7E]">Completed</p>
+                    <p className="text-3xl font-bold mt-2 text-[#2D1B1B]">
                         {bookings.filter(b => b.status === 'completed').length}
                     </p>
-                </div>
+                </AdminCard>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <AdminCard className="p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#9B8B7E]" size={20} />
                         <Input
                             type="text"
                             placeholder="Search by name, email, or phone..."
@@ -225,53 +230,53 @@ export function BookingManagement() {
                         </SelectContent>
                     </Select>
                 </div>
-            </div>
+            </AdminCard>
 
             {/* Bookings Table */}
             <div className="bg-white rounded-lg shadow border">
                 <Table>
-                    <TableHeader>
-                        <TableRow>
+                    <AdminTableHeader>
+                        <AdminTableRowHeader>
                             <TableHead>Customer</TableHead>
                             <TableHead>Service</TableHead>
                             <TableHead>Date & Time</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Payment</TableHead>
                             <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
+                        </AdminTableRowHeader>
+                    </AdminTableHeader>
                     <TableBody>
                         {filteredBookings.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                            <AdminTableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-[#9B8B7E]">
                                     No bookings found
                                 </TableCell>
-                            </TableRow>
+                            </AdminTableRow>
                         ) : (
                             filteredBookings.map((booking) => (
-                                <TableRow key={booking.id}>
+                                <AdminTableRow key={booking.id}>
                                     <TableCell>
                                         <div>
                                             <div className="font-medium flex items-center gap-2">
                                                 <User size={16} />
-                                                {booking.customer_name}
+                                                <span className="text-[#2D1B1B]">{booking.customer_name}</span>
                                             </div>
-                                            <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                            <div className="text-sm text-[#9B8B7E] flex items-center gap-2 mt-1">
                                                 <Mail size={14} />
                                                 {booking.customer_email}
                                             </div>
-                                            <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                            <div className="text-sm text-[#9B8B7E] flex items-center gap-2 mt-1">
                                                 <Phone size={14} />
                                                 {booking.customer_phone}
                                             </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="font-medium">
+                                        <div className="font-medium text-[#2D1B1B]">
                                             {booking.service?.title || 'N/A'}
                                         </div>
                                         {booking.service?.price_range && (
-                                            <div className="text-sm text-gray-500">
+                                            <div className="text-sm text-[#9B8B7E]">
                                                 {booking.service.price_range}
                                             </div>
                                         )}
@@ -279,9 +284,9 @@ export function BookingManagement() {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Calendar size={16} />
-                                            {new Date(booking.booking_date).toLocaleDateString('en-GB')}
+                                            <span className="text-[#2D1B1B]">{new Date(booking.booking_date).toLocaleDateString('en-GB')}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                                        <div className="flex items-center gap-2 mt-1 text-sm text-[#9B8B7E]">
                                             <Clock size={14} />
                                             {booking.booking_time}
                                         </div>
@@ -320,7 +325,7 @@ export function BookingManagement() {
                                             </Button>
                                         </div>
                                     </TableCell>
-                                </TableRow>
+                                </AdminTableRow>
                             ))
                         )}
                     </TableBody>
@@ -329,14 +334,14 @@ export function BookingManagement() {
 
             {/* Action Dialog */}
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
-                <DialogContent>
+                <AdminDialogContent>
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="text-[#2D1B1B]">
                             {actionType === 'confirm' && 'Confirm Booking'}
                             {actionType === 'cancel' && 'Cancel Booking'}
                             {actionType === 'delete' && 'Delete Booking'}
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="text-[#9B8B7E]">
                             {actionType === 'confirm' && 
                                 'Are you sure you want to confirm this booking? The customer will receive a confirmation email.'}
                             {actionType === 'cancel' && 
@@ -378,7 +383,7 @@ export function BookingManagement() {
                             {actionType === 'delete' && 'Delete'}
                         </Button>
                     </DialogFooter>
-                </DialogContent>
+                </AdminDialogContent>
             </Dialog>
         </div>
     );

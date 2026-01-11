@@ -15,6 +15,7 @@ import {
 } from 'react';
 import type { WebsiteSettings } from '../../lib/types';
 import { siteSettingsService } from '../../services/siteSettingsService';
+import { seoService } from '../../services/seoService';
 
 const defaultSettings: WebsiteSettings = {
   branding: {
@@ -93,7 +94,49 @@ export const WebsiteSettingsProvider = ({ children }: { children: ReactNode }) =
   }, []);
 
   useEffect(() => {
-    void fetchSettings();
+    void (async () => {
+      await fetchSettings();
+
+      // Prefetch SEO data for common pages so SEOHead can read from cache immediately
+      try {
+        if (typeof window === 'undefined') return;
+        const pageTypes: Array<{ page: string; identifier?: string }> = [
+          { page: 'home' },
+          { page: 'about' },
+          { page: 'services' },
+          { page: 'consent' },
+          { page: 'booking' },
+        ];
+
+        // Helper to write to the same localStorage shape used by usePersistentCache
+        const STORAGE_PREFIX = 'aura_cache_';
+        const setCache = (key: string, data: unknown) => {
+          try {
+            const record = { data, timestamp: Date.now() };
+            localStorage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(record));
+          } catch (err) {
+            // ignore
+          }
+        };
+
+        // Prefetch each core page
+        await Promise.all(
+          pageTypes.map(async (p) => {
+            try {
+              const res = await seoService.getPublicSEOData(p.page, p.identifier);
+              if (res.success && res.data) {
+                const key = `seo-${p.page}${p.identifier ? `-${p.identifier}` : ''}`;
+                setCache(key, res.data);
+              }
+            } catch (err) {
+              // ignore prefetch errors
+            }
+          })
+        );
+      } catch (err) {
+        // ignore prefetch errors
+      }
+    })();
   }, [fetchSettings]);
 
   const value = useMemo<WebsiteSettingsContextValue>(

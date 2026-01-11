@@ -4,8 +4,6 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableHeader,
-  TableRow,
 } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -18,6 +16,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import { 
+  AdminCard,
+  AdminTableHeader,
+  AdminTableRowHeader,
+  AdminTableRow,
+  AdminDialogContent
+} from '../../components/ui/admin';
 import { Edit, CalendarCheck, Award } from 'lucide-react';
 import { serviceInstructionsService } from '../../../services/serviceInstructionsService';
 import type { ServiceInstruction, ServiceInstructionPayload } from '../../../lib/types';
@@ -116,7 +121,7 @@ export default function ServiceInstructionsManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-gray-600">Loading instructions...</p>
+        <p className="text-[#9B8B7E]">Loading instructions...</p>
       </div>
     );
   }
@@ -125,12 +130,12 @@ export default function ServiceInstructionsManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Service Instructions</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-3xl font-bold text-[#2D1B1B]">Service Instructions</h1>
+        <p className="text-[#9B8B7E] mt-1">
           Manage important notices displayed on all service pages
         </p>
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-900">
+        <div className="mt-4 p-4 bg-[#FFF8F3] rounded-lg border border-[#E6D4C3]">
+          <p className="text-sm text-[#2D1B1B]">
             <strong>Note:</strong> These are global instructions shown on all service pages.
             There are only 2 instruction types by design. You can edit their content, but cannot add or delete them.
           </p>
@@ -138,10 +143,10 @@ export default function ServiceInstructionsManagement() {
       </div>
 
       {/* Instructions Table */}
-      <Card className="bg-white">
+      <AdminCard>
         <Table>
-          <TableHeader className="bg-[#FFF8F3]">
-            <TableRow>
+          <AdminTableHeader>
+            <AdminTableRowHeader>
               <TableHead className="w-12 text-black font-semibold"></TableHead>
               <TableHead className="text-black font-semibold">Type</TableHead>
               <TableHead className="text-black font-semibold">Title</TableHead>
@@ -149,39 +154,39 @@ export default function ServiceInstructionsManagement() {
               <TableHead className="text-black font-semibold">Icon</TableHead>
               <TableHead className="text-black font-semibold">Status</TableHead>
               <TableHead className="text-right text-black font-semibold">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+            </AdminTableRowHeader>
+          </AdminTableHeader>
           <TableBody>
             {instructions.map((instruction) => (
-              <TableRow key={instruction.id}>
+              <AdminTableRow key={instruction.id}>
                 <TableCell>{getInstructionIcon(instruction.type)}</TableCell>
                 <TableCell>
-                  <span className="font-mono text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                  <span className="font-mono text-xs bg-[#FFF8F3] text-[#9B8B7E] px-2 py-1 rounded border border-[#E6D4C3]">
                     {instruction.type}
                   </span>
                 </TableCell>
-                <TableCell className="font-medium text-gray-900">{instruction.title}</TableCell>
+                <TableCell className="font-medium text-[#2D1B1B]">{instruction.title}</TableCell>
                 <TableCell className="max-w-md">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-[#9B8B7E]">
                     {instruction.content.split(' ').slice(0, 5).join(' ')}
                     {instruction.content.split(' ').length > 5 ? '...' : ''}
                   </p>
                 </TableCell>
                 <TableCell>
                   {instruction.icon ? (
-                    <code className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                    <code className="text-xs bg-[#FFF8F3] text-[#9B8B7E] px-2 py-1 rounded border border-[#E6D4C3]">
                       {instruction.icon}
                     </code>
                   ) : (
-                    <span className="text-gray-500 text-sm">—</span>
+                    <span className="text-[#9B8B7E] text-sm">—</span>
                   )}
                 </TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       instruction.is_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-[#FFF8F3] text-[#9B8B7E] border border-[#E6D4C3]'
                     }`}
                   >
                     {instruction.is_active ? 'Active' : 'Inactive'}
@@ -192,41 +197,42 @@ export default function ServiceInstructionsManagement() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEdit(instruction)}
+                    className="hover:bg-[#FFF8F3] transition-all duration-200"
                   >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
+                    <Edit className="w-4 h-4 mr-2 text-[#D4AF77]" />
+                    <span className="text-[#2D1B1B]">Edit</span>
                   </Button>
                 </TableCell>
-              </TableRow>
+              </AdminTableRow>
             ))}
           </TableBody>
         </Table>
-      </Card>
+      </AdminCard>
 
       {/* Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <AdminDialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-[#2D1B1B]">
               Edit {editingInstruction && getInstructionLabel(editingInstruction.type)}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {editingInstruction && (
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-sm font-medium text-gray-900">
+              <div className="bg-[#FFF8F3] p-3 rounded-lg border border-[#E6D4C3]">
+                <p className="text-sm font-medium text-[#2D1B1B]">
                   Instruction Type
                 </p>
-                <p className="font-mono text-sm mt-1 text-gray-700">{editingInstruction.type}</p>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="font-mono text-sm mt-1 text-[#9B8B7E]">{editingInstruction.type}</p>
+                <p className="text-xs text-[#9B8B7E] mt-1">
                   The type cannot be changed. Only title, content, icon, and status can be edited.
                 </p>
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-[#2D1B1B]">
                 Title <span className="text-red-600">*</span>
               </label>
               <Input
@@ -235,12 +241,13 @@ export default function ServiceInstructionsManagement() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="e.g., Consultation Required"
+                className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">
+              <label className="text-sm font-medium text-[#2D1B1B]">
                 Content <span className="text-red-600">*</span>
               </label>
               <Textarea
@@ -249,24 +256,26 @@ export default function ServiceInstructionsManagement() {
                   setFormData({ ...formData, content: e.target.value })
                 }
                 placeholder="Full instruction content..."
+                className="border-[#E6D4C3] focus:border-[#D4AF77]"
                 rows={5}
                 required
               />
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[#9B8B7E]">
                 This text will be displayed on all service pages
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">Icon</label>
+              <label className="text-sm font-medium text-[#2D1B1B]">Icon</label>
               <Input
                 value={formData.icon || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, icon: e.target.value })
                 }
                 placeholder="e.g., calendar-check, award"
+                className="border-[#E6D4C3] focus:border-[#D4AF77]"
               />
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[#9B8B7E]">
                 Lucide icon name for UI display
               </p>
             </div>
@@ -279,21 +288,31 @@ export default function ServiceInstructionsManagement() {
                 onChange={(e) =>
                   setFormData({ ...formData, is_active: e.target.checked })
                 }
-                className="rounded border-gray-300"
+                className="rounded border-[#E6D4C3] text-[#D4AF77] focus:ring-[#D4AF77]"
               />
-              <label htmlFor="is_active" className="text-sm font-medium cursor-pointer text-gray-900">
+              <label htmlFor="is_active" className="text-sm font-medium cursor-pointer text-[#2D1B1B]">
                 Active (visible on service pages)
               </label>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseDialog}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCloseDialog}
+                className="border-[#E6D4C3] hover:bg-[#FFF8F3] transition-all duration-200"
+              >
                 Cancel
               </Button>
-              <Button type="submit">Update Instruction</Button>
+              <Button 
+                type="submit"
+                className="bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white hover:shadow-lg transition-all duration-200"
+              >
+                Update Instruction
+              </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );

@@ -10,6 +10,7 @@ import { resolveCmsAssetUrl } from '../../lib/asset';
 import type { HomeFeature, Service, HomeTestimonial } from '../../lib/types';
 import { usePersistentCache } from '../../hooks/usePersistentCache';
 import { HomeSkeleton } from '../components/skeletons/PageSkeletons';
+import { SEOHead } from '../components/SEOHead';
 
 interface HeroSlide {
   url: string;
@@ -315,6 +316,13 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
+      <SEOHead 
+        pageType="home"
+        fallbackTitle="Aura Aesthetics - Professional Beauty & Wellness Services"
+        fallbackDescription="Transform your beauty journey with our expert aesthetic treatments. Professional skincare, dermal fillers, and wellness services in a luxurious setting."
+        fallbackKeywords="aesthetics, beauty treatments, skincare, dermal fillers, wellness, botox, facial treatments, beauty clinic"
+      />
+      
       {/* Main Hero Slider - Full Width at Top */}
       <section className="relative h-screen overflow-hidden">
         <div className="overflow-hidden h-full" ref={heroEmblaRef}>

@@ -216,32 +216,32 @@ export function ConsentFormsManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-['Cormorant_Garamond'] text-4xl font-light text-[var(--aura-deep-brown)] mb-2">
+        <h1 className="font-['Cormorant_Garamond'] text-4xl font-light text-[#2D1B1B] mb-2">
           Consent Forms Management
         </h1>
-        <p className="font-['Inter'] text-[var(--aura-soft-taupe)]">
+        <p className="font-['Inter'] text-[#9B8B7E]">
           Review and manage customer consent forms for medical treatments
         </p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className="bg-white border-[#E6D4C3]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+            <CardTitle className="text-sm font-['Inter'] text-[#9B8B7E]">
               Total Forms
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-['Cormorant_Garamond'] font-bold text-[var(--aura-deep-brown)]">
+            <div className="text-3xl font-['Cormorant_Garamond'] font-bold text-[#2D1B1B]">
               {stats.total_forms}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-[#E6D4C3]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+            <CardTitle className="text-sm font-['Inter'] text-[#9B8B7E]">
               Pending Review
             </CardTitle>
           </CardHeader>
@@ -252,9 +252,9 @@ export function ConsentFormsManagement() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-[#E6D4C3]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+            <CardTitle className="text-sm font-['Inter'] text-[#9B8B7E]">
               Approved
             </CardTitle>
           </CardHeader>
@@ -265,9 +265,9 @@ export function ConsentFormsManagement() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-[#E6D4C3]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+            <CardTitle className="text-sm font-['Inter'] text-[#9B8B7E]">
               Expired
             </CardTitle>
           </CardHeader>
@@ -278,14 +278,14 @@ export function ConsentFormsManagement() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-[#E6D4C3]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+            <CardTitle className="text-sm font-['Inter'] text-[#9B8B7E]">
               Completion Rate
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-['Cormorant_Garamond'] font-bold text-[var(--aura-rose-gold)]">
+            <div className="text-3xl font-['Cormorant_Garamond'] font-bold text-[#D4AF77]">
               {stats.completion_rate.toFixed(1)}%
             </div>
           </CardContent>
@@ -293,11 +293,11 @@ export function ConsentFormsManagement() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="border-[#E6D4C3] bg-white">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--aura-soft-taupe)]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#9B8B7E]" />
               <Input
                 type="text"
                 placeholder="Search by name, email, phone, or ID..."
@@ -324,12 +324,12 @@ export function ConsentFormsManagement() {
       </Card>
 
       {/* Consent Forms Table */}
-      <Card>
+      <Card className="border-[#E6D4C3] bg-white">
         <CardContent className="pt-6">
           {filteredForms.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-[var(--aura-soft-taupe)] mx-auto mb-4" />
-              <p className="font-['Inter'] text-[var(--aura-soft-taupe)]">
+              <FileText className="h-12 w-12 text-[#9B8B7E] mx-auto mb-4" />
+              <p className="font-['Inter'] text-[#9B8B7E]">
                 No consent forms found
               </p>
             </div>
@@ -337,7 +337,7 @@ export function ConsentFormsManagement() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-[#E6D4C3]">
                     <th className="text-left py-3 px-4 font-['Inter'] text-sm font-medium text-[var(--aura-deep-brown)]">
                       Form ID
                     </th>
@@ -367,35 +367,35 @@ export function ConsentFormsManagement() {
                       key={form.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      className="border-b border-[#E6D4C3] hover:bg-[#FFF8F3] transition-colors"
                     >
-                      <td className="py-3 px-4 font-['Inter'] text-sm text-[var(--aura-deep-brown)] font-medium">
+                      <td className="py-3 px-4 font-['Inter'] text-sm text-[#2D1B1B] font-medium">
                         #{form.id}
                       </td>
                       <td className="py-3 px-4">
                         <div>
-                          <div className="font-['Inter'] text-sm font-medium text-[var(--aura-deep-brown)]">
+                          <div className="font-['Inter'] text-sm font-medium text-[#2D1B1B]">
                             {form.full_name}
                           </div>
-                          <div className="font-['Inter'] text-xs text-[var(--aura-soft-taupe)]">
+                          <div className="font-['Inter'] text-xs text-[#9B8B7E]">
                             DOB: {new Date(form.date_of_birth).toLocaleDateString()}
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-1 text-xs font-['Inter'] text-[var(--aura-soft-taupe)]">
+                          <div className="flex items-center gap-1 text-xs font-['Inter'] text-[#9B8B7E]">
                             <Mail className="h-3 w-3" />
                             {form.email}
                           </div>
-                          <div className="flex items-center gap-1 text-xs font-['Inter'] text-[var(--aura-soft-taupe)]">
+                          <div className="flex items-center gap-1 text-xs font-['Inter'] text-[#9B8B7E]">
                             <Phone className="h-3 w-3" />
                             {form.phone}
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-1 text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+                        <div className="flex items-center gap-1 text-sm font-['Inter'] text-[#9B8B7E]">
                           <Calendar className="h-3 w-3" />
                           {formatDate(form.date_signed)}
                         </div>
@@ -404,13 +404,13 @@ export function ConsentFormsManagement() {
                         {form.booking_id ? (
                           <Link
                             to={`/admin/bookings?id=${form.booking_id}`}
-                            className="flex items-center gap-1 text-sm font-['Inter'] text-[var(--aura-rose-gold)] hover:underline"
+                            className="flex items-center gap-1 text-sm font-['Inter'] text-[#D4AF77] hover:underline"
                           >
                             #{form.booking_id}
                             <ExternalLink className="h-3 w-3" />
                           </Link>
                         ) : (
-                          <span className="text-sm font-['Inter'] text-[var(--aura-soft-taupe)]">
+                          <span className="text-sm font-['Inter'] text-[#9B8B7E]">
                             No booking
                           </span>
                         )}
@@ -458,12 +458,12 @@ export function ConsentFormsManagement() {
 
       {/* Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white border-[#E6D4C3] text-[#2D1B1B]">
           <DialogHeader>
-            <DialogTitle className="font-['Cormorant_Garamond'] text-3xl font-light text-[var(--aura-deep-brown)]">
+            <DialogTitle className="font-['Cormorant_Garamond'] text-3xl font-light text-[#2D1B1B]">
               Consent Form Details #{selectedForm?.id}
             </DialogTitle>
-            <DialogDescription className="font-['Inter']">
+            <DialogDescription className="font-['Inter'] text-[#9B8B7E]">
               Review complete consent form information
             </DialogDescription>
           </DialogHeader>
@@ -471,9 +471,9 @@ export function ConsentFormsManagement() {
           {selectedForm && (
             <div className="space-y-6 font-['Inter']">
               {/* Status Actions */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-[#FFF8F3] rounded-lg border border-[#E6D4C3]">
                 <div>
-                  <div className="text-sm text-[var(--aura-soft-taupe)] mb-1">Current Status</div>
+                  <div className="text-sm text-[#9B8B7E] mb-1">Current Status</div>
                   {getStatusBadge(selectedForm.status)}
                 </div>
                 <div className="flex gap-2">
@@ -511,31 +511,31 @@ export function ConsentFormsManagement() {
 
               {/* Personal Information */}
               <div>
-                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[var(--aura-deep-brown)] mb-3">
+                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[#2D1B1B] mb-3">
                   Personal Information
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-[var(--aura-soft-taupe)]">Full Name</div>
+                    <div className="text-sm text-[#9B8B7E]">Full Name</div>
                     <div className="font-medium">{selectedForm.full_name}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-[var(--aura-soft-taupe)]">Date of Birth</div>
+                    <div className="text-sm text-[#9B8B7E]">Date of Birth</div>
                     <div className="font-medium">
                       {new Date(selectedForm.date_of_birth).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-[var(--aura-soft-taupe)]">Email</div>
+                    <div className="text-sm text-[#9B8B7E]">Email</div>
                     <div className="font-medium">{selectedForm.email}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-[var(--aura-soft-taupe)]">Phone</div>
+                    <div className="text-sm text-[#9B8B7E]">Phone</div>
                     <div className="font-medium">{selectedForm.phone}</div>
                   </div>
                   {selectedForm.address && (
                     <div className="col-span-2">
-                      <div className="text-sm text-[var(--aura-soft-taupe)]">Address</div>
+                      <div className="text-sm text-[#9B8B7E]">Address</div>
                       <div className="font-medium">{selectedForm.address}</div>
                     </div>
                   )}
@@ -545,19 +545,19 @@ export function ConsentFormsManagement() {
               {/* Emergency Contact */}
               {(selectedForm.emergency_contact || selectedForm.emergency_phone) && (
                 <div>
-                  <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[var(--aura-deep-brown)] mb-3">
+                  <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[#2D1B1B] mb-3">
                     Emergency Contact
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     {selectedForm.emergency_contact && (
                       <div>
-                        <div className="text-sm text-[var(--aura-soft-taupe)]">Name</div>
+                        <div className="text-sm text-[#9B8B7E]">Name</div>
                         <div className="font-medium">{selectedForm.emergency_contact}</div>
                       </div>
                     )}
                     {selectedForm.emergency_phone && (
                       <div>
-                        <div className="text-sm text-[var(--aura-soft-taupe)]">Phone</div>
+                        <div className="text-sm text-[#9B8B7E]">Phone</div>
                         <div className="font-medium">{selectedForm.emergency_phone}</div>
                       </div>
                     )}
@@ -567,17 +567,17 @@ export function ConsentFormsManagement() {
 
               {/* Medical History */}
               <div>
-                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[var(--aura-deep-brown)] mb-3 flex items-center gap-2">
+                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[#2D1B1B] mb-3 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-yellow-600" />
                   Medical History
                 </h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm text-[var(--aura-soft-taupe)] mb-2">Medical Conditions</div>
+                    <div className="text-sm text-[#9B8B7E] mb-2">Medical Conditions</div>
                     <div className="flex flex-wrap gap-2">
                       {selectedForm.medical_conditions.map((condition, index) => (
-                        <Badge key={index} variant="outline" className="font-['Inter']">
+                        <Badge key={index} variant="outline" className="font-['Inter'] bg-[#FFF8F3] border-[#E6D4C3] text-[#9B8B7E]">
                           {condition}
                         </Badge>
                       ))}
@@ -586,21 +586,21 @@ export function ConsentFormsManagement() {
 
                   {selectedForm.medications && (
                     <div>
-                      <div className="text-sm text-[var(--aura-soft-taupe)]">Current Medications</div>
+                      <div className="text-sm text-[#9B8B7E]">Current Medications</div>
                       <div className="font-medium">{selectedForm.medications}</div>
                     </div>
                   )}
 
                   {selectedForm.allergies && (
                     <div>
-                      <div className="text-sm text-[var(--aura-soft-taupe)]">Allergies</div>
+                      <div className="text-sm text-[#9B8B7E]">Allergies</div>
                       <div className="font-medium text-red-600">{selectedForm.allergies}</div>
                     </div>
                   )}
 
                   {selectedForm.medical_history && (
                     <div>
-                      <div className="text-sm text-[var(--aura-soft-taupe)]">Additional Medical History</div>
+                      <div className="text-sm text-[#9B8B7E]">Additional Medical History</div>
                       <div className="font-medium">{selectedForm.medical_history}</div>
                     </div>
                   )}
@@ -609,32 +609,48 @@ export function ConsentFormsManagement() {
 
               {/* Consent Declarations */}
               <div>
-                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[var(--aura-deep-brown)] mb-3">
+                <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[#2D1B1B] mb-3">
                   Consent Declarations
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <span className="text-sm">
-                      {selectedForm.consent_information_accuracy && 'Confirmed all information is accurate and complete'}
+                    {selectedForm.consent_information_accuracy ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-[#9B8B7E] mt-0.5" />
+                    )}
+                    <span className="text-sm text-[#2D1B1B]">
+                      Confirmed all information is accurate and complete
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <span className="text-sm">
-                      {selectedForm.consent_treatment_information && 'Informed about treatment, risks, and alternatives'}
+                    {selectedForm.consent_treatment_information ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-[#9B8B7E] mt-0.5" />
+                    )}
+                    <span className="text-sm text-[#2D1B1B]">
+                      Informed about treatment, risks, and alternatives
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <span className="text-sm">
-                      {selectedForm.consent_risks && 'Understands and accepts treatment risks'}
+                    {selectedForm.consent_risks ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-[#9B8B7E] mt-0.5" />
+                    )}
+                    <span className="text-sm text-[#2D1B1B]">
+                      Understands and accepts treatment risks
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <span className="text-sm">
-                      {selectedForm.consent_authorization && 'Authorizes Aura Aesthetics to perform treatment'}
+                    {selectedForm.consent_authorization ? (
+                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-[#9B8B7E] mt-0.5" />
+                    )}
+                    <span className="text-sm text-[#2D1B1B]">
+                      Authorizes Aura Aesthetics to perform treatment
                     </span>
                   </div>
                 </div>
@@ -645,7 +661,7 @@ export function ConsentFormsManagement() {
                 <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold text-[var(--aura-deep-brown)] mb-3">
                   Digital Signature
                 </h3>
-                <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <div className="p-6 bg-[#FFF8F3] rounded-lg border-2 border-[#E6D4C3]">
                   <div className="font-['Cormorant_Garamond'] text-4xl text-[var(--aura-deep-brown)] mb-4">
                     {selectedForm.signature}
                   </div>
@@ -660,7 +676,7 @@ export function ConsentFormsManagement() {
 
               {/* Booking Link */}
               {selectedForm.booking_id && (
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="p-4 bg-[#FFF8F3] rounded-lg border border-[#E6D4C3]">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm text-[var(--aura-soft-taupe)]">Linked Booking</div>
@@ -699,7 +715,7 @@ export function ConsentFormsManagement() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white border-[#E6D4C3]">
           <DialogHeader>
             <DialogTitle className="font-['Cormorant_Garamond'] text-2xl font-light text-[var(--aura-deep-brown)]">
               Delete Consent Form

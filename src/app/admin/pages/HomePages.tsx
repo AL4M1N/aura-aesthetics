@@ -31,10 +31,10 @@ import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { AdminDialogContent, AdminTableHeader, AdminTableRowHeader, AdminTableRow } from '../../components/ui/admin';
 import { ImageUploadField } from '../../components/ImageUploadField';
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -701,7 +701,7 @@ export function HomePages() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="flex flex-wrap gap-2 bg-[#FFF8F3] p-2 rounded-xl">
+        <TabsList className="flex flex-wrap justify-center gap-2 bg-[#FFF8F3] p-2 rounded-xl">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="data-[state=active]:bg-white">
               {tab.label}
@@ -764,8 +764,8 @@ export function HomePages() {
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
+                    <AdminTableHeader>
+                      <AdminTableRowHeader>
                         <TableHead className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-[#6B4F41]">
                           Preview
                         </TableHead>
@@ -784,11 +784,11 @@ export function HomePages() {
                         <TableHead className="text-right text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-[#6B4F41]">
                           Actions
                         </TableHead>
-                      </TableRow>
-                    </TableHeader>
+                      </AdminTableRowHeader>
+                    </AdminTableHeader>
                     <TableBody>
                       {filteredSliders.map((slider) => (
-                        <TableRow key={slider.id}>
+                        <AdminTableRow key={slider.id}>
                           <TableCell>
                             {slider.media_url ? (
                               <img
@@ -870,7 +870,7 @@ export function HomePages() {
                               </Button>
                             </div>
                           </TableCell>
-                        </TableRow>
+                        </AdminTableRow>
                       ))}
                     </TableBody>
                   </Table>
@@ -880,10 +880,10 @@ export function HomePages() {
           </Card>
 
           <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
+            <AdminDialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{selectedSlider ? 'Edit slide' : 'Add slide'}</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-[#2D1B1B]">{selectedSlider ? 'Edit slide' : 'Add slide'}</DialogTitle>
+                <DialogDescription className="text-[#9B8B7E]">
                   Hero carousel rows power the first fold of the public homepage.
                 </DialogDescription>
               </DialogHeader>
@@ -983,7 +983,7 @@ export function HomePages() {
                   {selectedSlider ? 'Update slider' : 'Add slider'}
                 </Button>
               </DialogFooter>
-            </DialogContent>
+            </AdminDialogContent>
           </Dialog>
         </TabsContent>
 
@@ -1284,7 +1284,7 @@ export function HomePages() {
 
           {/* Feature Add/Edit Dialog */}
           <Dialog open={isFeatureDialogOpen} onOpenChange={handleFeatureDialogChange}>
-            <DialogContent className="max-w-2xl bg-white">
+            <AdminDialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>{selectedFeature ? 'Edit feature' : 'Add new feature'}</DialogTitle>
                 <DialogDescription>
@@ -1387,7 +1387,7 @@ export function HomePages() {
                   {selectedFeature ? 'Update feature' : 'Add feature'}
                 </Button>
               </DialogFooter>
-            </DialogContent>
+            </AdminDialogContent>
           </Dialog>
         </TabsContent>
 
@@ -1680,7 +1680,7 @@ export function HomePages() {
           </div>
 
           <Dialog open={isTestimonialDialogOpen} onOpenChange={setIsTestimonialDialogOpen}>
-            <DialogContent className="bg-white max-w-2xl">
+            <AdminDialogContent className="max-w-2xl">
               <div className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-[#2D1B1B]">
@@ -1812,7 +1812,7 @@ export function HomePages() {
                 </DialogFooter>
               </form>
               </div>
-            </DialogContent>
+            </AdminDialogContent>
           </Dialog>
         </TabsContent>
 ```

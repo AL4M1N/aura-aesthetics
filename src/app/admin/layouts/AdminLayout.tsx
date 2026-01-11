@@ -79,6 +79,11 @@ const menuItems: MenuItem[] = [
       { title: 'Instructions', path: '/admin/service-instructions' },
     ],
   },
+  {
+    title: 'SEO Management',
+    icon: FileText,
+    path: '/admin/seo',
+  },
 ];
 
 export function AdminLayout() {
@@ -121,19 +126,19 @@ export function AdminLayout() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FFF8F3]">
       {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+      <header className="bg-white border-b border-[#E6D4C3] fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-[#FFF8F3] rounded-lg transition-all duration-200"
             >
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              {sidebarOpen ? <X size={20} className="text-[#2D1B1B]" /> : <Menu size={20} className="text-[#2D1B1B]" />}
             </button>
           <Link to="/admin/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF77] to-[#C9A58D] rounded-lg"></div>
+            <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF77] to-[#C9A58D] rounded-lg shadow-sm"></div>
             <span className="font-semibold text-lg text-[#2D1B1B]">Aura Aesthetics</span>
           </Link>
           </div>
@@ -143,7 +148,7 @@ export function AdminLayout() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#FFF8F3] rounded-lg hover:bg-[#FFF0E6] transition-colors"
+                className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#FFF8F3] rounded-lg hover:bg-[#F0E4D9] transition-all duration-200 border border-[#E6D4C3]"
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-[#D4AF77] to-[#C9A58D] rounded-full flex items-center justify-center text-white text-sm font-semibold">
                   A
@@ -157,22 +162,22 @@ export function AdminLayout() {
 
               {/* Dropdown Menu */}
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#E6D4C3] py-2 z-50">
                   <Link
                     to="/admin/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-[#2D1B1B] hover:bg-[#FFF8F3] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-[#2D1B1B] hover:bg-[#FFF8F3] transition-all duration-200"
                   >
-                    <User size={18} />
+                    <User size={18} className="text-[#9B8B7E]" />
                     <span>My Profile</span>
                   </Link>
-                  <hr className="my-2 border-gray-200" />
+                  <hr className="my-2 border-[#E6D4C3]" />
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
                     }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 transition-all duration-200"
                   >
                     <LogOut size={18} />
                     <span>Logout</span>
@@ -184,7 +189,7 @@ export function AdminLayout() {
             {/* Mobile Logout Button */}
             <button
               onClick={handleLogout}
-              className="md:hidden flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="md:hidden flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
               title="Logout"
               aria-label="Logout"
             >
@@ -196,27 +201,27 @@ export function AdminLayout() {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed top-16 left-0 bottom-0 bg-white border-r border-gray-200 transition-all duration-300 z-40 ${
+        className={`fixed top-16 left-0 bottom-0 bg-white border-r border-[#E6D4C3] transition-all duration-300 z-40 ${
           sidebarOpen ? 'w-64' : 'w-0'
         } overflow-hidden`}
       >
-        <nav className="p-4 space-y-2">
+        <nav className="h-full overflow-y-auto p-4 space-y-2">
           {menuItems.map((item) => (
             <div key={item.title}>
               {item.submenu ? (
                 <div>
                   <button
                     onClick={() => toggleMenu(item.title)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-[#2D1B1B] hover:bg-[#FFF8F3] rounded-lg transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3 text-[#2D1B1B] hover:bg-[#FFF8F3] rounded-lg transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
-                      <item.icon size={20} />
+                      <item.icon size={20} className="text-[#9B8B7E]" />
                       <span className="font-medium">{item.title}</span>
                     </div>
                     {expandedMenus.includes(item.title) ? (
-                      <ChevronDown size={16} />
+                      <ChevronDown size={16} className="text-[#9B8B7E]" />
                     ) : (
-                      <ChevronRight size={16} />
+                      <ChevronRight size={16} className="text-[#9B8B7E]" />
                     )}
                   </button>
                   {expandedMenus.includes(item.title) && (
@@ -225,10 +230,10 @@ export function AdminLayout() {
                         <Link
                           key={subitem.path}
                           to={subitem.path}
-                          className={`block px-4 py-2 text-sm rounded-lg transition-colors ${
+                          className={`block px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                             isActive(subitem.path)
-                              ? 'bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white'
-                              : 'text-[#9B8B7E] hover:bg-[#FFF8F3]'
+                              ? 'bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white shadow-sm'
+                              : 'text-[#9B8B7E] hover:bg-[#FFF8F3] hover:text-[#2D1B1B]'
                           }`}
                         >
                           {subitem.title}
@@ -240,13 +245,13 @@ export function AdminLayout() {
               ) : (
                 <Link
                   to={item.path!}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive(item.path!)
-                      ? 'bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white'
+                      ? 'bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white shadow-sm'
                       : 'text-[#2D1B1B] hover:bg-[#FFF8F3]'
                   }`}
                 >
-                  <item.icon size={20} />
+                  <item.icon size={20} className={isActive(item.path!) ? 'text-white' : 'text-[#9B8B7E]'} />
                   <span className="font-medium">{item.title}</span>
                 </Link>
               )}
@@ -261,7 +266,7 @@ export function AdminLayout() {
           sidebarOpen ? 'ml-64' : 'ml-0'
         } bg-white min-h-screen`}
       >
-        <div className="p-6 bg-gray-50">
+        <div className="p-6 bg-[#FFF8F3]">
           <Outlet />
         </div>
       </main>

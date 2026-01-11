@@ -12,6 +12,7 @@ import type {
 } from '../../lib/types';
 import { usePersistentCache } from '../../hooks/usePersistentCache';
 import { AboutSkeleton } from '../components/skeletons/PageSkeletons';
+import { SEOHead } from '../components/SEOHead';
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   award: Award,
@@ -105,6 +106,13 @@ export function About() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
+      <SEOHead 
+        pageType="about"
+        fallbackTitle="About Us - Aura Aesthetics | Expert Beauty & Wellness Team"
+        fallbackDescription="Meet our experienced team of aesthetic professionals. Learn about our qualifications, values, and commitment to delivering exceptional beauty and wellness services."
+        fallbackKeywords="about aura aesthetics, beauty professionals, aesthetic team, qualifications, experience, wellness experts"
+      />
+      
       {/* Hero Section */}
       {hero && (
         <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">

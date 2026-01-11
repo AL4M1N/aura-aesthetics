@@ -4,8 +4,6 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableHeader,
-  TableRow,
 } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -19,6 +17,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import { 
+  AdminCard, 
+  AdminTableHeader, 
+  AdminTableRowHeader, 
+  AdminTableRow, 
+  AdminBadgeSecondary,
+  AdminDialogContent
+} from '../../components/ui/admin';
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { serviceCategoriesService } from '../../../services/serviceCategoriesService';
 import type { ServiceCategory, ServiceCategoryPayload } from '../../../lib/types';
@@ -149,22 +155,25 @@ export default function ServiceCategoriesManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Service Categories</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-[#2D1B1B]">Service Categories</h1>
+          <p className="text-[#9B8B7E] mt-1">
             Manage service categories and organize your services
           </p>
         </div>
-        <Button onClick={handleOpenDialog}>
+        <Button 
+          onClick={handleOpenDialog}
+          className="bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white hover:shadow-lg transition-all duration-200"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Category
         </Button>
       </div>
 
       {/* Categories Table */}
-      <Card className="bg-white">
+      <AdminCard>
         <Table>
-          <TableHeader className="bg-[#FFF8F3]">
-            <TableRow>
+          <AdminTableHeader>
+            <AdminTableRowHeader>
               <TableHead className="text-black font-semibold">Name</TableHead>
               <TableHead className="text-black font-semibold">Slug</TableHead>
               <TableHead className="text-black font-semibold">Icon</TableHead>
@@ -172,55 +181,55 @@ export default function ServiceCategoriesManagement() {
               <TableHead className="text-black font-semibold">Sort Order</TableHead>
               <TableHead className="text-black font-semibold">Status</TableHead>
               <TableHead className="text-right text-black font-semibold">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+            </AdminTableRowHeader>
+          </AdminTableHeader>
           <TableBody>
             {categories.length === 0 ? (
-              <TableRow>
+              <AdminTableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   No categories found. Create your first category to get started.
                 </TableCell>
-              </TableRow>
+              </AdminTableRow>
             ) : (
               categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell className="font-medium text-gray-900">{category.name}</TableCell>
+                <AdminTableRow key={category.id}>
+                  <TableCell className="font-medium text-[#2D1B1B]">{category.name}</TableCell>
                   <TableCell>
-                    <code className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                    <code className="text-xs bg-[#FFF8F3] text-[#9B8B7E] px-2 py-1 rounded border border-[#E6D4C3]">
                       {category.slug}
                     </code>
                   </TableCell>
                   <TableCell>
                     {category.icon ? (
-                      <code className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                      <code className="text-xs bg-[#FFF8F3] text-[#9B8B7E] px-2 py-1 rounded border border-[#E6D4C3]">
                         {category.icon}
                       </code>
                     ) : (
-                      <span className="text-gray-500 text-sm">—</span>
+                      <span className="text-[#9B8B7E] text-sm">—</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">
+                    <AdminBadgeSecondary>
                       {category.services_count || 0} services
-                    </Badge>
+                    </AdminBadgeSecondary>
                   </TableCell>
-                  <TableCell>{category.sort_order}</TableCell>
+                  <TableCell className="text-[#2D1B1B]">{category.sort_order}</TableCell>
                   <TableCell>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleToggleStatus(category.id, category.is_active)}
-                      className="h-8"
+                      className="h-8 hover:bg-[#FFF8F3] transition-all duration-200"
                     >
                       {category.is_active ? (
                         <>
-                          <Eye className="w-4 h-4 mr-2" />
-                          Active
+                          <Eye className="w-4 h-4 mr-2 text-green-600" />
+                          <span className="text-green-600">Active</span>
                         </>
                       ) : (
                         <>
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Inactive
+                          <EyeOff className="w-4 h-4 mr-2 text-[#9B8B7E]" />
+                          <span className="text-[#9B8B7E]">Inactive</span>
                         </>
                       )}
                     </Button>
@@ -230,30 +239,31 @@ export default function ServiceCategoriesManagement() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleEdit(category)}
+                      className="hover:bg-[#FFF8F3] transition-all duration-200"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-4 h-4 text-[#D4AF77]" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(category.id)}
-                      className="text-destructive hover:text-destructive"
+                      className="text-red-600 hover:bg-red-50 transition-all duration-200"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </TableCell>
-                </TableRow>
+                </AdminTableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </Card>
+      </AdminCard>
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <AdminDialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-[#2D1B1B]">
               {editingId ? 'Edit Category' : 'Create Category'}
             </DialogTitle>
           </DialogHeader>
@@ -261,8 +271,8 @@ export default function ServiceCategoriesManagement() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Name <span className="text-destructive">*</span>
+                <label className="text-sm font-medium text-[#2D1B1B]">
+                  Name <span className="text-red-600">*</span>
                 </label>
                 <Input
                   value={formData.name}
@@ -271,26 +281,28 @@ export default function ServiceCategoriesManagement() {
                   }
                   placeholder="e.g., Dermal Fillers"
                   required
+                  className="border-[#E6D4C3] focus:border-[#D4AF77] focus:ring-[#D4AF77]"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">Slug</label>
+                <label className="text-sm font-medium text-[#2D1B1B]">Slug</label>
                 <Input
                   value={formData.slug || ''}
                   onChange={(e) =>
                     setFormData({ ...formData, slug: e.target.value })
                   }
                   placeholder="Auto-generated from name"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77] focus:ring-[#D4AF77]"
                 />
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-[#9B8B7E]">
                   Leave empty to auto-generate from name
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium text-[#2D1B1B]">Description</label>
               <Textarea
                 value={formData.description || ''}
                 onChange={(e) =>
@@ -298,26 +310,28 @@ export default function ServiceCategoriesManagement() {
                 }
                 placeholder="Brief description of this category..."
                 rows={3}
+                className="border-[#E6D4C3] focus:border-[#D4AF77] focus:ring-[#D4AF77]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">Icon</label>
+                <label className="text-sm font-medium text-[#2D1B1B]">Icon</label>
                 <Input
                   value={formData.icon || ''}
                   onChange={(e) =>
                     setFormData({ ...formData, icon: e.target.value })
                   }
                   placeholder="e.g., syringe, sparkles"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77] focus:ring-[#D4AF77]"
                 />
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-[#9B8B7E]">
                   Lucide icon name for UI display
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Sort Order</label>
+                <label className="text-sm font-medium text-[#2D1B1B]">Sort Order</label>
                 <Input
                   type="number"
                   value={formData.sort_order}
@@ -325,6 +339,7 @@ export default function ServiceCategoriesManagement() {
                     setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })
                   }
                   min="0"
+                  className="border-[#E6D4C3] focus:border-[#D4AF77] focus:ring-[#D4AF77]"
                 />
               </div>
             </div>
@@ -337,23 +352,31 @@ export default function ServiceCategoriesManagement() {
                 onChange={(e) =>
                   setFormData({ ...formData, is_active: e.target.checked })
                 }
-                className="rounded border-gray-300"
+                className="rounded border-[#E6D4C3] text-[#D4AF77] focus:ring-[#D4AF77]"
               />
-              <label htmlFor="is_active" className="text-sm font-medium cursor-pointer">
+              <label htmlFor="is_active" className="text-sm font-medium cursor-pointer text-[#2D1B1B]">
                 Active (visible to public)
               </label>
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseDialog}>
+            <DialogFooter className="gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCloseDialog}
+                className="border-[#E6D4C3] text-[#2D1B1B] hover:bg-[#FFF8F3] transition-all duration-200"
+              >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button 
+                type="submit"
+                className="bg-gradient-to-r from-[#D4AF77] to-[#C9A58D] text-white hover:from-[#C9A58D] hover:to-[#B8957C] transition-all duration-200 shadow-sm"
+              >
                 {editingId ? 'Update Category' : 'Create Category'}
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );

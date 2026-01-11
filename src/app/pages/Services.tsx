@@ -10,6 +10,7 @@ import { resolveCmsAssetUrl } from '../../lib/asset';
 import type { ServiceCategory, ServiceInstruction, Service } from '../../lib/types';
 import { usePersistentCache } from '../../hooks/usePersistentCache';
 import { ServicesSkeleton } from '../components/skeletons/PageSkeletons';
+import { SEOHead } from '../components/SEOHead';
 
 interface ServicesContentPayload {
   categories: ServiceCategory[];
@@ -228,6 +229,13 @@ export function Services() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
+      <SEOHead 
+        pageType="services"
+        fallbackTitle="Services & Pricing - Aura Aesthetics | Premium Beauty Treatments"
+        fallbackDescription="Discover our comprehensive range of aesthetic services with transparent pricing. From skincare to dermal fillers, explore premium beauty treatments with expert care."
+        fallbackKeywords="aesthetic services, beauty treatments, skincare services, dermal fillers, botox, facial treatments, beauty pricing"
+      />
+      
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0">

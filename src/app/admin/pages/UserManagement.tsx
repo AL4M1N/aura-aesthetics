@@ -24,11 +24,11 @@ import { roleService } from '../../../services/roleService';
 import type { User, Role } from '../../../lib/types';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
 } from '../../components/ui/dialog';
+import { AdminDialogContent } from '../../components/ui/admin';
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -329,7 +329,7 @@ export function UserManagement() {
       name: user.name,
       email: user.email,
       phone: user.phone || '',
-      role_id: user.role_id.toString(),
+  role_id: String(user.role?.id ?? (user as any).role_id ?? ''),
       status: user.status,
     });
     setShowEditModal(true);
@@ -442,7 +442,7 @@ export function UserManagement() {
             <p className="text-sm text-[#9B8B7E]">Refreshing users...</p>
           </div>
         )}
-        <div className={`overflow-x-auto ${tableLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`${tableLoading ? 'opacity-50 pointer-events-none' : ''}`}>
           <table className="w-full">
             <thead className="bg-[#FFF8F3] border-b border-[#D4AF77]/20">
               <tr>
@@ -469,7 +469,7 @@ export function UserManagement() {
             <tbody className="divide-y divide-[#D4AF77]/10">
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-[#FFF8F3] transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-normal break-words align-top max-w-[220px]">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF77] to-[#C9A58D] rounded-full flex items-center justify-center text-white font-semibold">
                         {user.name.charAt(0)}
@@ -479,11 +479,11 @@ export function UserManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-normal break-words align-top max-w-[280px]">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-[#9B8B7E]">
                         <Mail size={14} />
-                        {user.email}
+                        <span className="break-all">{user.email}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-[#9B8B7E]">
                         <Phone size={14} />
@@ -491,7 +491,7 @@ export function UserManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-normal break-words align-top">
                     <div className="flex items-center gap-2">
                       <Shield size={16} className="text-[#D4AF77]" />
                       <span className="text-sm font-medium text-[#2D1B1B]">
@@ -499,7 +499,7 @@ export function UserManagement() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-normal break-words align-top">
                     <span
                       className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
                         user.status === 'active'
@@ -510,10 +510,10 @@ export function UserManagement() {
                       {user.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#9B8B7E]">
+                  <td className="px-6 py-4 whitespace-normal break-words align-top text-sm text-[#9B8B7E]">
                     {user.last_login_at || 'Never'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <td className="px-6 py-4 whitespace-nowrap text-right align-top">
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => openRoleModal(user)}
@@ -570,7 +570,7 @@ export function UserManagement() {
 
       {/* Add User Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-white">
+        <AdminDialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-[#2D1B1B]">Add New User</DialogTitle>
             <DialogDescription className="text-[#9B8B7E]">
@@ -732,12 +732,12 @@ export function UserManagement() {
               </button>
             </div>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
 
       {/* Edit User Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-white">
+        <AdminDialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-[#2D1B1B]">Edit User</DialogTitle>
             <DialogDescription className="text-[#9B8B7E]">
@@ -849,12 +849,12 @@ export function UserManagement() {
               </button>
             </div>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
 
       {/* Role Details Modal */}
       <Dialog open={showRoleModal} onOpenChange={setShowRoleModal}>
-        <DialogContent className="max-w-md bg-white">
+        <AdminDialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-[#2D1B1B]">User Role</DialogTitle>
             <DialogDescription className="text-[#9B8B7E]">
@@ -910,12 +910,12 @@ export function UserManagement() {
               </button>
             </div>
           )}
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
 
       {/* Delete Confirmation Modal */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent className="max-w-md bg-white">
+        <AdminDialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-red-600">Delete User</DialogTitle>
             <DialogDescription className="text-[#9B8B7E]">
@@ -950,7 +950,7 @@ export function UserManagement() {
               </div>
             </div>
           )}
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );

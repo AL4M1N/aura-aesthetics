@@ -38,6 +38,7 @@ const AboutPages = lazy(() => import('./admin/pages/AboutPages').then(module => 
 const ServicesManagement = lazy(() => import('./admin/pages/ServicesManagement').then(module => ({ default: module.ServicesManagement })));
 const ServiceCategoriesManagement = lazy(() => import('./admin/pages/ServiceCategoriesManagement'));
 const ServiceInstructionsManagement = lazy(() => import('./admin/pages/ServiceInstructionsManagement'));
+const SEOManagement = lazy(() => import('./admin/pages/SEOManagement').then(module => ({ default: module.SEOManagement })));
 const BookingManagement = lazy(() => import('./admin/pages/BookingManagement').then(module => ({ default: module.BookingManagement })));
 const ConsentFormsManagement = lazy(() => import('./admin/pages/ConsentFormsManagement').then(module => ({ default: module.ConsentFormsManagement })));
 
@@ -145,6 +146,7 @@ function AppContent() {
         <Route path="services" element={<ServicesManagement />} />
         <Route path="service-categories" element={<ServiceCategoriesManagement />} />
         <Route path="service-instructions" element={<ServiceInstructionsManagement />} />
+        <Route path="seo" element={<SEOManagement />} />
         <Route path="profile" element={<UserProfile />} />
       </Route>
 

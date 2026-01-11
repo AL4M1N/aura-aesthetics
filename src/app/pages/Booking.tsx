@@ -18,6 +18,7 @@ import type { Service } from '../../lib/types';
 import { useWebsiteSettings } from '../context/WebsiteSettingsContext';
 import { ServicesSkeleton } from '../components/skeletons/PageSkeletons';
 import { usePersistentCache } from '../../hooks/usePersistentCache';
+import { SEOHead } from '../components/SEOHead';
 
 const DEFAULT_CONTACT_EMAIL = 'info@auraaesthetics.co.uk';
 const DEFAULT_CONTACT_PHONE = '+44 7XXX 123456';
@@ -248,6 +249,13 @@ export function Booking() {
 
   return (
     <div className="min-h-screen bg-[var(--aura-cream)]">
+      <SEOHead 
+        pageType="booking"
+        fallbackTitle="Book Appointment - Aura Aesthetics | Schedule Your Treatment"
+        fallbackDescription="Book your aesthetic treatment appointment online. Choose from our range of professional beauty services and secure your preferred time slot at Aura Aesthetics."
+        fallbackKeywords="book appointment, schedule treatment, aesthetic booking, beauty appointment, online booking, aura aesthetics"
+      />
+      
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0">

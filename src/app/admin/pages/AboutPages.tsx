@@ -28,10 +28,10 @@ import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { AdminDialogContent } from '../../components/ui/admin';
 import { ImageUploadField } from '../../components/ImageUploadField';
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -490,7 +490,7 @@ export function AboutPages() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-[#FFF8F3] border border-[#E6D4C3]">
+        <TabsList className="flex flex-wrap justify-center gap-2 bg-[#FFF8F3] p-2 rounded-xl border border-[#E6D4C3]">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.value}
@@ -654,6 +654,7 @@ export function AboutPages() {
                               value={bioFormData.badge_icon}
                               onChange={(e) => setBioFormData({ ...bioFormData, badge_icon: e.target.value })}
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              title="Select badge icon"
                             >
                               {iconOptions.map((opt) => (
                                 <option key={opt.value} value={opt.value}>
@@ -1030,7 +1031,7 @@ export function AboutPages() {
       
       {/* Qualification Dialog */}
       <Dialog open={isQualDialogOpen} onOpenChange={setIsQualDialogOpen}>
-        <DialogContent className="bg-white max-w-lg">
+        <AdminDialogContent className="max-w-lg">
           <div className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-[#2D1B1B]">
@@ -1108,12 +1109,12 @@ export function AboutPages() {
               </DialogFooter>
             </form>
           </div>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
 
       {/* Value Dialog (Similar to Qualification) */}
       <Dialog open={isValuesDialogOpen} onOpenChange={setIsValuesDialogOpen}>
-        <DialogContent className="bg-white max-w-lg">
+        <AdminDialogContent className="max-w-lg">
           <div className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-[#2D1B1B]">
@@ -1191,12 +1192,12 @@ export function AboutPages() {
               </DialogFooter>
             </form>
           </div>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
 
       {/* Certificate Dialog */}
       <Dialog open={isCertDialogOpen} onOpenChange={setIsCertDialogOpen}>
-        <DialogContent className="bg-white max-w-lg">
+        <AdminDialogContent className="max-w-lg">
           <div className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-[#2D1B1B]">
@@ -1287,7 +1288,7 @@ export function AboutPages() {
               </DialogFooter>
             </form>
           </div>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );
